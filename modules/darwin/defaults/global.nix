@@ -1,30 +1,10 @@
-{ lib, ... }:
+{ ... }:
 {
-  system.defaults.NSGlobalDomain = {
-    AppleShowAllExtensions = true;
-
-    ApplePressAndHoldEnabled = false;
-    KeyRepeat = 1;
-    InitialKeyRepeat = 10;
-
-    _HIHideMenuBar = false;
-
-    AppleEnableSwipeNavigateWithScrolls = false;
-
-    AppleFontSmoothing = 0;
-
-    NSAutomaticCapitalizationEnabled = false;
-    NSAutomaticDashSubstitutionEnabled = false;
-    NSAutomaticPeriodSubstitutionEnabled = false;
-    NSAutomaticQuoteSubstitutionEnabled = false;
-    NSAutomaticSpellingCorrectionEnabled = false;
-  };
-
   system.defaults.CustomUserPreferences = {
     "com.apple.symbolichotkeys" = {
       AppleSymbolicHotKeys = {
-        "64" = { enabled = false; };
-        "65" = { enabled = false; };
+        "64" = { enabled = true; };
+        "65" = { enabled = true; };
       };
     };
 
@@ -37,23 +17,8 @@
       Disabled = true;
     };
 
-    "com.apple.mail" = {
-      DisableInlineAttachmentViewing = true;
-      AddressesIncludeNameOnPasteboard = false;
-    };
-
-    "com.apple.Safari" = {
-      IncludeInternalDebugMenu = true;
-      WebKitDeveloperExtrasEnabledPreferenceKey = true;
-    };
-
     "com.apple.CrashReporter" = {
       DialogType = "none";
-    };
-
-    "com.apple.desktopservices" = {
-      DSDontWriteNetworkStores = true;
-      DSDontWriteUSBStores = true;
     };
 
     "com.apple.TimeMachine" = {
@@ -78,13 +43,38 @@
       AutoUpdate = false;
     };
 
-    "com.apple.appstore" = {
-      ShowDebugMenu = true;
-      WebKitDeveloperExtras = true;
+    "com.apple.desktopservices" = {
+      DSDontWriteNetworkStores = true;
+      DSDontWriteUSBStores = true;
+    };
+
+    "NSGlobalDomain" = {
+      FocusFollowsMouse = true;
+      # Kill window open/close animations
+      NSAutomaticWindowAnimationsEnabled = false;
+      NSWindowResizeTime = 0.001;
+      # Kill scroll animation
+      NSScrollAnimationEnabled = false;
+      # Prevent macOS from throttling/suspending background apps
+      NSAppSleepDisabled = true;
+      NSDisableAutomaticTermination = true;
+    };
+
+    "com.apple.universalaccess" = {
+      # Disable transparency — less GPU compositing overhead
+      reduceTransparency = true;
+      # Disable motion animations system-wide
+      reduceMotion = true;
+    };
+
+    "com.apple.finder" = {
+      DisableAllAnimations = true;
     };
   };
 
-  system.defaults.WindowManager = {
-    EnableStandardClickToShowDesktop = false;
+  system.defaults.NSGlobalDomain = {
+    # Fastest key repeat (1 = minimum delay, snappiest input)
+    KeyRepeat = 1;
+    InitialKeyRepeat = 10;
   };
 }

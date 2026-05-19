@@ -107,6 +107,12 @@
 
           jsonls.enable = true;
 
+          sourcekit = {
+            enable = true;
+            cmd = [ "/usr/bin/sourcekit-lsp" ];
+            filetypes = [ "swift" "objc" "objcpp" ];
+          };
+
           astro = {
             enable = true;
             settings = {

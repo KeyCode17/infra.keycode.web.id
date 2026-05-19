@@ -20,7 +20,7 @@
   vpsDigitalOceanUsername = "ms";
   vpsDigitalOceanHostname = "droplet";
 
-  enableLaravel = true;
+  enableLaravel = false;
   enableRust = true;
   enableVolta = true;
   enableGolang = false;

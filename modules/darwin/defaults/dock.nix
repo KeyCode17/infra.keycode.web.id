@@ -1,23 +1,13 @@
 { ... }:
 {
   system.defaults.dock = {
+    launchanim = false;
+    expose-animation-duration = 0.1;
     autohide = true;
-    autohide-delay = 0.5;
-    autohide-time-modifier = 1.0;
-    expose-animation-duration = 0.2;
-    launchanim = true;
+    autohide-delay = 0.0;
+    autohide-time-modifier = 0.0;
     show-recents = false;
-    tilesize = 48;
-    magnification = false;
-    mineffect = "genie";
-    orientation = "bottom";
-    persistent-apps = [ ];
-    static-only = false;
-    mru-spaces = false;
+    mineffect = "scale";
     minimize-to-application = true;
-  };
-
-  system.defaults.spaces = {
-    spans-displays = false;
   };
 }

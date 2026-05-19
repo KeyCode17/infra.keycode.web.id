@@ -14,6 +14,7 @@
     ./defaults
     ./fonts
     ./homebrew
+    ./services
   ];
 
   users.users.${username} = {

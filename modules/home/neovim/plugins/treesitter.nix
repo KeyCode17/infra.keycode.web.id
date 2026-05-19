@@ -14,6 +14,7 @@
           "javascript"
           "typescript"
           "tsx"
+          "swift"
         ];
       };
     };

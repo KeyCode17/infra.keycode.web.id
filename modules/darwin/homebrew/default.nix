@@ -14,15 +14,13 @@
     ];
 
     casks = [
+      "hammerspoon"
+      "ghostty"
       "google-chrome"
-      "microsoft-edge"
       "firefox"
-      "cmux"
-      "postman"
       "discord"
-      "raycast"
+      "slack"
       "figma"
-      "inkscape"
       "pritunl"
     ];
   };

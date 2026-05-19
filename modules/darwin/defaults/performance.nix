@@ -1,53 +1,6 @@
-{ pkgs, ... }:
+{ ... }:
 {
   launchd.daemons = {
-    performance-mode = {
-      serviceConfig = {
-        Label = "com.local.performance-mode";
-        ProgramArguments = [
-          "/bin/bash"
-          "-c"
-          ''
-            # Disable auto-sleep from idle (but lid close still sleeps)
-            pmset -a hibernatemode 0
-            pmset -a disksleep 0
-            pmset -a displaysleep 0
-            pmset -a powernap 0
-            pmset -a autopoweroff 0
-            pmset -a standby 0
-            pmset -a proximitywake 0
-            pmset -a ttyskeepawake 1
-
-            # Force max CPU performance
-            pmset -a lowpowermode 0
-            pmset -a gpuswitch 2
-            pmset -a sms 0
-            pmset -a lidwake 1
-            pmset -a lessbright 0
-            pmset -a halfdim 0
-
-            # Disable CPU throttling (keep fans spinning)
-            pmset -a highstandbythreshold 100
-
-            # Disable Siri
-            defaults write com.apple.assistant.support "Assistant Enabled" -bool false
-            launchctl disable "user/$UID/com.apple.Siri" 2>/dev/null || true
-            launchctl disable "gui/$UID/com.apple.Siri" 2>/dev/null || true
-
-            # Apply sysctl settings
-            sysctl -w kern.maxfiles=524288 2>/dev/null || true
-            sysctl -w kern.maxfilesperproc=262144 2>/dev/null || true
-            sysctl -w kern.maxproc=4096 2>/dev/null || true
-            sysctl -w kern.maxprocperuid=2048 2>/dev/null || true
-            sysctl -w kern.ipc.somaxconn=4096 2>/dev/null || true
-
-            echo "Performance mode activated"
-          ''
-        ];
-        RunAtLoad = true;
-      };
-    };
-
     disable-tm-local = {
       serviceConfig = {
         Label = "com.local.disable-tm-local";
@@ -71,30 +24,119 @@
         RunAtLoad = true;
       };
     };
+
+    # Weekly storage cleanup — runs every Sunday at 03:00
+    storage-cleanup = {
+      serviceConfig = {
+        Label = "com.local.storage-cleanup";
+        ProgramArguments = [
+          "/bin/sh"
+          "-c"
+          ''
+            # Chrome code_sign_clone (biggest offender, accumulates ~1-2GB/day)
+            find /private/var/folders -type d -name 'com.google.Chrome.code_sign_clone' -exec rm -rf {} + 2>/dev/null
+
+            # uv Python package cache
+            rm -rf /Users/ms/.cache/uv
+
+            # Nix garbage collection
+            /run/current-system/sw/bin/nix-collect-garbage -d
+
+            # Homebrew cache
+            /opt/homebrew/bin/brew cleanup --prune=all 2>/dev/null
+
+            # Xcode DerivedData
+            rm -rf /Users/ms/Library/Developer/Xcode/DerivedData
+
+            # Unused simulator runtimes and devices
+            /usr/bin/xcrun simctl delete unavailable 2>/dev/null
+
+            # App caches older than 7 days
+            find /Users/ms/Library/Caches -mindepth 2 -maxdepth 2 -atime +7 -exec rm -rf {} + 2>/dev/null
+
+            # Nix cache
+            rm -rf /Users/ms/.cache/nix
+
+            # Claude Code vm_bundles (recreated on demand)
+            rm -rf "/Users/ms/Library/Application Support/Claude/vm_bundles"
+
+            # Docker prune inside Colima (unused images, volumes, build cache)
+            /opt/homebrew/bin/colima ssh -- docker system prune -af --volumes 2>/dev/null
+
+            # Stale git worktrees in Development projects
+            find /Users/ms/Development -maxdepth 3 -name ".git" -type d | while read g; do
+              git -C "$(dirname $g)" worktree prune 2>/dev/null
+            done
+
+            # Gradle caches
+            rm -rf /Users/ms/.gradle/caches /Users/ms/.gradle/wrapper/dists
+
+            echo "Storage cleanup done: $(date)" >> /var/log/storage-cleanup.log
+          ''
+        ];
+        StartCalendarInterval = [
+          {
+            Weekday = 1;
+            Hour = 3;
+            Minute = 0;
+          }
+        ];
+        StandardOutPath = "/var/log/storage-cleanup.log";
+        StandardErrorPath = "/var/log/storage-cleanup.log";
+      };
+    };
+
+    # Max performance pmset — battery drain acceptable
+    pmset-performance = {
+      serviceConfig = {
+        Label = "com.local.pmset-performance";
+        ProgramArguments = [
+          "/bin/sh"
+          "-c"
+          ''
+            # Disable hibernation (no RAM dump to disk — faster sleep/wake)
+            /usr/bin/pmset -a hibernatemode 0
+            /usr/bin/pmset -a standby 0
+            /usr/bin/pmset -a autopoweroff 0
+
+            # AC: sleep 30min, no throttle, no power saving
+            /usr/bin/pmset -c sleep 30 displaysleep 10 disksleep 10 \
+              powernap 0 lowpowermode 0 womp 0 tcpkeepalive 0
+
+            # Battery: same performance profile, don't reduce CPU speed
+            /usr/bin/pmset -b sleep 10 displaysleep 5 disksleep 5 \
+              powernap 0 lowpowermode 0 lessbright 0
+          ''
+        ];
+        RunAtLoad = true;
+      };
+    };
+
+    # Kernel performance tuning via sysctl
+    sysctl-performance = {
+      serviceConfig = {
+        Label = "com.local.sysctl-performance";
+        ProgramArguments = [
+          "/bin/sh"
+          "-c"
+          ''
+            # File descriptor limits — prevents "too many open files" under heavy dev load
+            /usr/sbin/sysctl -w kern.maxfiles=524288
+            /usr/sbin/sysctl -w kern.maxfilesperproc=524288
+
+            # Network: disable TCP delayed ACK for lower latency
+            /usr/sbin/sysctl -w net.inet.tcp.delayed_ack=0
+
+            # Network: larger TCP buffers for faster throughput
+            /usr/sbin/sysctl -w net.inet.tcp.sendspace=1048576
+            /usr/sbin/sysctl -w net.inet.tcp.recvspace=1048576
+
+            # Network: faster connection reuse
+            /usr/sbin/sysctl -w net.inet.tcp.msl=1000
+          ''
+        ];
+        RunAtLoad = true;
+      };
+    };
   };
-
-  environment.etc = {
-    "sysctl.conf".text = ''
-      # File descriptors
-      kern.maxfiles=524288
-      kern.maxfilesperproc=262144
-      kern.maxproc=4096
-      kern.maxprocperuid=2048
-
-      # Network buffers
-      kern.ipc.somaxconn=4096
-      kern.ipc.nmbclusters=131072
-      net.inet.tcp.sendspace=524288
-      net.inet.tcp.recvspace=524288
-      net.inet.udp.recvspace=524288
-      net.inet.udp.maxdgram=65535
-      net.inet.tcp.mssdflt=1460
-      net.inet.tcp.win_scale_factor=8
-
-    '';
-  };
-
-  environment.systemPackages = with pkgs; [
-    bottom
-  ];
 }

@@ -21,6 +21,7 @@
     ./ssh
     ./sops
     ./ghostty
+    ./hammerspoon
     ./services
     ./wallpaper
     ./laravel

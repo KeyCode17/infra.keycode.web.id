@@ -20,12 +20,7 @@
         jq
         tree
         bun
-        slack
-        speedtest-cli
-        k6
         ffmpeg
-        zig
-        zls
         cmake
         ninja
         meson
