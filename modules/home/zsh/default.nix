@@ -30,7 +30,6 @@
           "git"
           "z"
           "docker"
-          "kubectl"
         ];
       };
 
