@@ -104,12 +104,28 @@
           kb_layout = "us";
           kb_options = "caps:escape";
           follow_mouse = 1;
-          sensitivity = 0.5;
+          sensitivity = 0.0;
+          accel_profile = "adaptive";
+          scroll_factor = 0.2;
           touchpad = {
             natural_scroll = true;
             tap-to-click = true;
+            scroll_factor = 0.2;
           };
         };
+
+        device = [
+          {
+            name = "asup1303:00-093a:3003-touchpad";
+            sensitivity = 0.0;
+            scroll_factor = 0.2;
+          }
+          {
+            name = "asup1303:00-093a:3003-mouse";
+            sensitivity = 0.0;
+            scroll_factor = 0.2;
+          }
+        ];
 
         cursor = {
           default_monitor = "";
@@ -118,6 +134,9 @@
         env = [
           "XCURSOR_THEME,Bibata-Modern-Classic"
           "XCURSOR_SIZE,24"
+          "NIXOS_OZONE_WL,1"
+          "ELECTRON_OZONE_PLATFORM_HINT,auto"
+          "MOZ_ENABLE_WAYLAND,1"
         ];
 
         misc = {

@@ -27,19 +27,6 @@
 
     programs.home-manager.enable = true;
 
-    dconf.settings = {
-      "org/gnome/mutter" = {
-        experimental-features = [ "scale-monitor-framebuffer" ];
-      };
-      "org/gnome/desktop/interface" = {
-        text-scaling-factor = 1.5;
-        gtk-theme = "rose-pine";
-        icon-theme = "rose-pine";
-        cursor-theme = "Bibata-Modern-Classic";
-        color-scheme = "prefer-dark";
-      };
-    };
-
     systemd.user.services.battery-monitor = {
       Unit = {
         Description = "Low battery notification";

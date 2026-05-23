@@ -91,6 +91,22 @@
 
   nixpkgs.config.allowUnfree = true;
 
+  nixpkgs.overlays = [
+    (final: prev:
+      let
+        jediFix = pyfinal: pyprev: {
+          jedi-language-server = pyprev.jedi-language-server.overridePythonAttrs (old: {
+            dontCheckRuntimeDeps = true;
+          });
+        };
+      in {
+        python3Packages = prev.python3Packages.overrideScope jediFix;
+        python313Packages = prev.python313Packages.overrideScope jediFix;
+        python3 = prev.python3.override { packageOverrides = jediFix; };
+        python313 = prev.python313.override { packageOverrides = jediFix; };
+      })
+  ];
+
   environment.systemPackages = with pkgs; [
     vim
     wget

@@ -47,9 +47,6 @@
     gcc
     gnumake
     cmake
-
-    gnome-tweaks
-    dconf-editor
   ];
 
   services.printing.enable = true;

@@ -25,6 +25,8 @@
     "acpi.ec_no_wakeup=1"
   ];
 
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/839aa9c0-07fc-4019-abdf-2966b5794881";
     fsType = "ext4";

@@ -22,8 +22,15 @@
     };
   };
 
-  services.displayManager.gdm.enable = true;
-  services.desktopManager.gnome.enable = true;
+  services.displayManager.ly = {
+    enable = true;
+    settings = {
+      animation = "matrix";
+      hide_borders = true;
+      clock = "%H:%M";
+    };
+  };
+  services.displayManager.defaultSession = lib.mkIf enableTilingWM "hyprland";
 
   # Tell Chromium / Electron apps (Discord, Edge, Slack, VSCode) to run
   # natively on Wayland instead of XWayland — fixes blurry scaling and
@@ -45,14 +52,6 @@
       xdg-desktop-portal-hyprland
     ];
   };
-
-  environment.gnome.excludePackages = with pkgs; [
-    gnome-tour
-    gnome-music
-    epiphany
-    geary
-    totem
-  ];
 
   programs.dconf.enable = true;
 

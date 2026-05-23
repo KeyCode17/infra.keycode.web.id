@@ -38,12 +38,23 @@
     };
   };
 
-  services.displayManager.gdm.enable = true;
-  services.desktopManager.gnome.enable = true;
+  services.displayManager.ly = {
+    enable = true;
+    settings = {
+      animation = "matrix";
+      hide_borders = true;
+      clock = "%H:%M";
+    };
+  };
+  services.displayManager.defaultSession = lib.mkIf enableTilingWM "hyprland";
 
   programs.hyprland = lib.mkIf enableTilingWM {
     enable = true;
     xwayland.enable = true;
+  };
+
+  environment.sessionVariables = {
+    NIXOS_OZONE_WL = "1";
   };
 
   xdg.portal = {
@@ -57,14 +68,6 @@
         xdg-desktop-portal-hyprland
       ];
   };
-
-  environment.gnome.excludePackages = with pkgs; [
-    gnome-tour
-    gnome-music
-    epiphany
-    geary
-    totem
-  ];
 
   programs.dconf.enable = true;
 
@@ -159,8 +162,6 @@
       gcc
       gnumake
       cmake
-      gnome-tweaks
-      dconf-editor
       nautilus
       libnotify
       polkit_gnome

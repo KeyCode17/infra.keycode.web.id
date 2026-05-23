@@ -225,6 +225,7 @@
           enableVolta
           enableGolang
           sshKeys
+          claude-code
           ;
       };
 
