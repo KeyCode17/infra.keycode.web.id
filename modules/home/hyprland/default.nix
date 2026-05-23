@@ -91,7 +91,6 @@
         };
 
         dwindle = {
-          pseudotile = true;
           preserve_split = true;
           force_split = 2;
         };
@@ -177,8 +176,7 @@
           "$mod SHIFT, E, exit"
           "$mod, V, togglefloating"
           "$mod, F, fullscreen"
-          "$mod, P, pseudo"
-          "$mod, J, togglesplit"
+          "$mod, J, layoutmsg, togglesplit"
 
           "$mod, left, movefocus, l"
           "$mod, right, movefocus, r"

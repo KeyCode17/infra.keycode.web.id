@@ -49,7 +49,7 @@
       slack
       discord
 
-      microsoft-edge
+      brave
 
       imagemagick
       ffmpeg
