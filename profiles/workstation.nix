@@ -68,6 +68,15 @@
       ++ lib.optionals enableTilingWM [
         xdg-desktop-portal-hyprland
       ];
+    config = {
+      common = {
+        default = [
+          "hyprland"
+          "gtk"
+        ];
+        "org.freedesktop.impl.portal.Settings" = [ "gtk" ];
+      };
+    };
   };
 
   programs.dconf.enable = true;

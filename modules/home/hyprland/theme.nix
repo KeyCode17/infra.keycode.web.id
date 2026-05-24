@@ -52,6 +52,7 @@
       libsForQt5.qtstyleplugin-kvantum
       kdePackages.qtstyleplugin-kvantum
       rose-pine-kvantum
+      adw-gtk3
     ];
 
     xdg.configFile."Kvantum/kvantum.kvconfig".text = ''
@@ -70,7 +71,19 @@
     home.sessionVariables = {
       XCURSOR_SIZE = "24";
       XCURSOR_THEME = "Bibata-Modern-Classic";
-      GTK_THEME = "rose-pine";
+      GTK_THEME = "rose-pine:dark";
+    };
+
+    dconf.settings = {
+      "org/gnome/desktop/interface" = {
+        color-scheme = "prefer-dark";
+        gtk-theme = "rose-pine";
+        icon-theme = "rose-pine";
+        cursor-theme = "Bibata-Modern-Classic";
+        font-name = "Quicksand 11";
+        document-font-name = "Quicksand 11";
+        monospace-font-name = "JetBrainsMono Nerd Font 11";
+      };
     };
 
     # TODO: Add wallpaper.jpg to repo root to enable this
