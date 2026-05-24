@@ -148,10 +148,6 @@
     HandlePowerKeyLongPress = "poweroff";
   };
 
-  boot.kernelParams = [
-    "i2c_hid.polling_mode=1"
-  ];
-
   services.udev.extraRules = ''
     # ASUP1303 touchpad firmware locks up if power-gated during suspend.
     # Keep i2c device fully powered to prevent the firmware bug.
@@ -200,7 +196,7 @@
       polkit_gnome
     ]
     ++ lib.optionals enableTilingWM [
-      hyprpaper
+      swaybg
       hyprlock
       hypridle
       hyprpicker

@@ -35,7 +35,7 @@
 
         exec-once = [
           "hyprctl setcursor Bibata-Modern-Classic 24"
-          "hyprpaper"
+          "swaybg -i /home/${username}/Downloads/2109.jpg -m fill"
           "eww open bar"
           "swayosd-server"
           "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
@@ -253,59 +253,134 @@
       };
     };
 
-    home.file.".config/hypr/hyprpaper.conf".text = ''
-      preload = ~/Downloads/2109.jpg
-      wallpaper = ,~/Downloads/2109.jpg
-      splash = false
-    '';
-
     home.file.".config/hypr/hyprlock.conf".text = ''
+      general {
+        disable_loading_bar = true
+        grace = 0
+        hide_cursor = true
+        no_fade_in = false
+      }
+
       background {
         monitor =
         path = ~/Downloads/2109.jpg
-        blur_passes = 3
-        blur_size = 8
-        brightness = 1.0
+        blur_passes = 4
+        blur_size = 9
+        noise = 0.012
+        contrast = 0.95
+        brightness = 0.65
+        vibrancy = 0.18
+        vibrancy_darkness = 0.05
+      }
+
+      label {
+        monitor =
+        text = cmd[update:1000] echo "$(date +'%H:%M')"
+        color = rgba(224, 222, 244, 0.95)
+        font_size = 120
+        font_family = JetBrainsMono Nerd Font ExtraBold
+        position = 0, 240
+        halign = center
+        valign = center
+        shadow_passes = 2
+        shadow_size = 6
+        shadow_color = rgba(0, 0, 0, 0.45)
+      }
+
+      label {
+        monitor =
+        text = cmd[update:30000] echo "$(date +'%A, %d %B %Y')"
+        color = rgba(196, 167, 231, 0.90)
+        font_size = 18
+        font_family = JetBrainsMono Nerd Font Medium
+        position = 0, 120
+        halign = center
+        valign = center
+      }
+
+      shape {
+        monitor =
+        size = 130, 130
+        color = rgba(31, 29, 46, 0.55)
+        rounding = -1
+        border_size = 2
+        border_color = rgba(196, 167, 231, 0.60)
+        position = 0, -30
+        halign = center
+        valign = center
+        shadow_passes = 2
+        shadow_size = 4
+        shadow_color = rgba(0, 0, 0, 0.35)
+      }
+
+      label {
+        monitor =
+        text = 󰀄
+        color = rgba(196, 167, 231, 0.90)
+        font_size = 64
+        font_family = JetBrainsMono Nerd Font
+        position = 0, -30
+        halign = center
+        valign = center
+      }
+
+      label {
+        monitor =
+        text = $USER
+        color = rgba(224, 222, 244, 0.95)
+        font_size = 16
+        font_family = JetBrainsMono Nerd Font Bold
+        position = 0, -135
+        halign = center
+        valign = center
       }
 
       input-field {
         monitor =
-        size = 300, 50
-        outline_thickness = 3
-        dots_size = 0.33
-        dots_spacing = 0.15
+        size = 320, 52
+        outline_thickness = 2
+        dots_size = 0.26
+        dots_spacing = 0.30
         dots_center = true
-        outer_color = rgb(c4a7e7)
-        inner_color = rgb(1f1d2e)
-        font_color = rgb(e0def4)
+        dots_rounding = -1
+        outer_color = rgba(196, 167, 231, 0.55)
+        inner_color = rgba(31, 29, 46, 0.65)
+        font_color = rgba(224, 222, 244, 0.95)
         fade_on_empty = false
-        placeholder_text = <span foreground="##c4a7e7">Password...</span>
+        rounding = 26
+        check_color = rgba(156, 207, 216, 0.85)
+        fail_color = rgba(235, 111, 146, 0.85)
+        fail_text = <i>$FAIL <b>($ATTEMPTS)</b></i>
+        placeholder_text = <span font_family="JetBrainsMono Nerd Font" foreground="##c4a7e7cc">  Enter password</span>
         hide_input = false
-        position = 0, -20
+        position = 0, -200
         halign = center
         valign = center
+        shadow_passes = 2
+        shadow_size = 4
+        shadow_color = rgba(0, 0, 0, 0.35)
       }
 
       label {
         monitor =
-        text = Hi Cutie!
-        color = rgb(c4a7e7)
-        font_size = 48
+        text = cmd[update:60000] echo "  $(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -1)%"
+        color = rgba(196, 167, 231, 0.75)
+        font_size = 12
         font_family = JetBrainsMono Nerd Font
-        position = 0, 150
-        halign = center
-        valign = center
+        position = -20, 20
+        halign = right
+        valign = bottom
       }
 
       label {
         monitor =
-        text = $TIME
-        color = rgb(e0def4)
-        font_size = 96
+        text = cmd[update:30000] echo "  $(nmcli -t -f active,ssid dev wifi | awk -F: '/^yes/{print $2; exit}' || echo 'offline')"
+        color = rgba(196, 167, 231, 0.75)
+        font_size = 12
         font_family = JetBrainsMono Nerd Font
-        position = 0, 50
-        halign = center
-        valign = center
+        position = 20, 20
+        halign = left
+        valign = bottom
       }
     '';
 
