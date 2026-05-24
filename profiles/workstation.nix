@@ -8,6 +8,7 @@
 {
   imports = [
     ./base.nix
+    ../modules/nixos/android.nix
   ];
 
   users.users.${username}.extraGroups = [
@@ -145,6 +146,38 @@
     HandleLidSwitchDocked = "ignore";
     HandlePowerKey = "suspend";
     HandlePowerKeyLongPress = "poweroff";
+  };
+
+  boot.kernelParams = [
+    "i2c_hid.polling_mode=1"
+  ];
+
+  services.udev.extraRules = ''
+    # ASUP1303 touchpad firmware locks up if power-gated during suspend.
+    # Keep i2c device fully powered to prevent the firmware bug.
+    SUBSYSTEM=="i2c", KERNEL=="i2c-ASUP1303:00", ATTR{device/power/control}="on"
+    ACTION=="add", SUBSYSTEM=="platform", KERNEL=="AMDI0010:03", ATTR{power/control}="on"
+  '';
+
+  systemd.services.touchpad-resume-fix = {
+    description = "Reset I2C touchpad after resume (workaround for ASUP1303 firmware)";
+    wantedBy = [
+      "post-resume.target"
+      "suspend.target"
+    ];
+    after = [ "post-resume.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = pkgs.writeShellScript "touchpad-resume-fix" ''
+        DRV=/sys/bus/platform/drivers/i2c_designware
+        DEV=AMDI0010:03
+        if [ -e "$DRV/$DEV" ]; then
+          echo "$DEV" > "$DRV/unbind" || true
+          sleep 2
+          echo "$DEV" > "$DRV/bind" || true
+        fi
+      '';
+    };
   };
 
   security.polkit.enable = true;

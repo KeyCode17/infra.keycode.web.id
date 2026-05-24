@@ -2,12 +2,14 @@
   pkgs,
   username,
   claude-code,
+  claude-desktop,
   ...
 }:
 {
   home-manager.users.${username}.home = {
     packages = with pkgs; [
       claude-code.packages.${pkgs.system}.default
+      claude-desktop.packages.${pkgs.system}.claude-desktop-with-fhs
 
       eza
       bat
