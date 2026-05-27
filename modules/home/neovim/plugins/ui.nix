@@ -23,6 +23,36 @@
           inc_rename = false;
           lsp_doc_border = true;
         };
+        routes = [
+          {
+            filter = {
+              event = "msg_show";
+              any = [
+                { find = "%d+L, %d+B"; }
+                { find = "; after #%d+"; }
+                { find = "; before #%d+"; }
+                { find = "%d fewer lines"; }
+                { find = "%d more lines"; }
+                { find = "written"; }
+                { find = "search hit BOTTOM"; }
+                { find = "search hit TOP"; }
+                { find = "E486"; }
+              ];
+            };
+            opts.skip = true;
+          }
+          {
+            filter = {
+              event = "lsp";
+              kind = "progress";
+            };
+            opts.skip = true;
+          }
+          {
+            filter.event = "notify";
+            view = "mini";
+          }
+        ];
         views = {
           cmdline_popup = {
             position = {
