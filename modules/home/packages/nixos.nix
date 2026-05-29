@@ -52,7 +52,6 @@
       slack
       discord
 
-      brave
       google-chrome
 
       imagemagick
