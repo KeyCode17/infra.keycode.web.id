@@ -31,7 +31,11 @@
         "$iris" = "rgb(c4a7e7)";
         "$highlightMed" = "rgb(403d52)";
 
-        monitor = ",preferred,auto,1.25";
+        monitor = [
+          "eDP-1,2880x1800@90,0x0,1.33"
+          "HDMI-A-1,1920x1080@60,auto,0.8"
+          ",preferred,auto,1.0"
+        ];
 
         exec-once = [
           "hyprctl setcursor Bibata-Modern-Classic 32"
@@ -105,7 +109,7 @@
           follow_mouse = 1;
           sensitivity = 0.0;
           accel_profile = "adaptive";
-          scroll_factor = 0.2;
+          scroll_factor = 1.0;
           touchpad = {
             natural_scroll = true;
             tap-to-click = true;
