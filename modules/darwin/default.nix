@@ -15,6 +15,8 @@
     ./fonts
     ./homebrew
     ./services
+    ./aerospace
+    ./sketchybar
   ];
 
   users.users.${username} = {

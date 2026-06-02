@@ -73,8 +73,8 @@
   };
 
   system.defaults.NSGlobalDomain = {
-    # Fastest key repeat (1 = minimum delay, snappiest input)
     KeyRepeat = 1;
     InitialKeyRepeat = 10;
+    _HIHideMenuBar = true;
   };
 }

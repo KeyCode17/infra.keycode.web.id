@@ -9,8 +9,7 @@ let
     /usr/local/bin/yabai -m config layout bsp
     /usr/local/bin/yabai -m config auto_balance off
 
-    # DWM-style: no gaps, no bar
-    /usr/local/bin/yabai -m config external_bar all:0:0
+    /usr/local/bin/yabai -m config external_bar all:44:0
 
     /usr/local/bin/yabai -m config top_padding 0
     /usr/local/bin/yabai -m config bottom_padding 0
