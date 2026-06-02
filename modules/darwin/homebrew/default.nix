@@ -15,7 +15,7 @@
 
     casks = [
       "hammerspoon"
-      "google-chrome"
+      "helium-browser"
       "firefox"
       "discord"
       "slack"

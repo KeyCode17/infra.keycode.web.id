@@ -11,7 +11,6 @@ let
     # Keybinds mirror workstation (Hyprland/SUPER → macOS/cmd)
 
     start-at-login = true
-    focus-follows-mouse = 'during-std-events'
 
     exec-on-workspace-change = [
       '/bin/bash', '-c',
@@ -33,6 +32,7 @@ let
     # Terminal / launcher
     alt-enter   = 'exec-and-forget open -n $HOME/Applications/Home\ Manager\ Trampolines/kitty.app'
     alt-d       = 'exec-and-forget open -a Raycast'
+    alt-b       = 'exec-and-forget open -a Helium'
 
     # Window focus (vim-style, mirrors $mod + hjkl on workstation)
     alt-h = 'focus left'

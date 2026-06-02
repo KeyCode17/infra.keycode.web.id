@@ -6,9 +6,13 @@
 
     local mouseWatcher = hs.eventtap.new({ hs.eventtap.event.types.mouseMoved }, function()
       local pos = hs.mouse.absolutePosition()
-      local win = hs.window.find(function(w)
-        return w:isVisible() and not w:isMinimized() and w:frame():containsPoint(pos)
-      end)
+      local win = nil
+      for _, w in ipairs(hs.window.allWindows()) do
+        if w:isVisible() and not w:isMinimized() and w:frame():containsPoint(pos) then
+          win = w
+          break
+        end
+      end
       if win and win ~= prevWindow then
         win:focus()
         prevWindow = win
@@ -26,8 +30,8 @@
       if now - lastSwipe < 0.4 then return end
       lastSwipe = now
       hs.task.new(
-        "/Applications/Nix Apps/AeroSpace.app/Contents/MacOS/AeroSpace",
-        nil, { "workspace", dir }
+        "/run/current-system/sw/bin/aerospace",
+        nil, { "workspace", "--wrap-around", dir }
       ):start()
     end
 
