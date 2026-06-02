@@ -30,7 +30,7 @@ let
 
     [mode.main.binding]
     # Terminal / launcher
-    alt-enter   = 'exec-and-forget open -a Ghostty'
+    alt-enter   = 'exec-and-forget open -a kitty'
     alt-d       = 'exec-and-forget open -a Raycast'
 
     # Window focus (vim-style, mirrors $mod + hjkl on workstation)
