@@ -15,7 +15,6 @@
 
     casks = [
       "hammerspoon"
-      "ghostty"
       "google-chrome"
       "firefox"
       "discord"

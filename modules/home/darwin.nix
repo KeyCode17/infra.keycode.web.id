@@ -20,7 +20,7 @@
     ./docker
     ./ssh
     ./sops
-    ./ghostty
+    ./kitty
     ./hammerspoon
     ./services
     ./wallpaper
