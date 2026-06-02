@@ -5,6 +5,7 @@
   enableVolta ? false,
   enableGolang ? false,
   sshKeys ? [ ],
+  mac-app-util,
   lib,
   ...
 }:
@@ -31,5 +32,6 @@
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   home-manager.backupFileExtension = "backup";
+  home-manager.sharedModules = [ mac-app-util.homeManagerModules.default ];
   home-manager.users.${username}.home.stateVersion = "24.11";
 }
