@@ -23,10 +23,10 @@ let
     [gaps]
     inner.horizontal = 8
     inner.vertical   = 8
-    outer.left       = 8
-    outer.bottom     = 8
-    outer.top        = 12
-    outer.right      = 8
+    outer.left       = 10
+    outer.bottom     = 10
+    outer.top        = 15
+    outer.right      = 10
 
     [mode.main.binding]
     # Terminal / launcher

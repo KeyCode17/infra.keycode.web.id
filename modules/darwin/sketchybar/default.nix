@@ -99,12 +99,14 @@ print(int(val.value * 100))
 
     sketchybar --bar \
       position=top \
-      height=44 \
+      height=40 \
       blur_radius=20 \
-      color=0xe0191724 \
-      border_width=0 \
-      margin=10 \
-      y_offset=0 \
+      color=0xdd191724 \
+      border_width=1 \
+      border_color=0x30c4a7e7 \
+      corner_radius=16 \
+      margin=12 \
+      y_offset=8 \
       topmost=window
 
     sketchybar --default \

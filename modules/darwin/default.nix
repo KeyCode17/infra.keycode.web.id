@@ -17,6 +17,7 @@
     ./services
     ./aerospace
     ./sketchybar
+    ./android.nix
   ];
 
   users.users.${username} = {

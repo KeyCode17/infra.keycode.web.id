@@ -27,6 +27,7 @@
         pkg-config
         ccache
         bear
+        android-tools
       ]
       ++ lib.optionals enableRust [ rustup ]
       ++ lib.optionals enableVolta [ volta ]
