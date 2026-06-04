@@ -10,58 +10,87 @@ let
   # $NAME  is set by sketchybar (e.g. "space.3")
   # $AEROSPACE_FOCUSED_WORKSPACE is passed via the trigger payload
   spaceScript = pkgs.writeShellScript "sb-space" ''
+    export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
     WS_NUM="''${NAME#space.}"
     if [ "$AEROSPACE_FOCUSED_WORKSPACE" = "$WS_NUM" ]; then
-      sketchybar --set "$NAME" \
+      sketchybar --animate overshoot 15 --set "$NAME" \
         background.color=0xffc4a7e7 \
-        background.height=26 \
-        background.corner_radius=13 \
-        icon.padding_left=9 \
-        icon.padding_right=9 \
-        icon.color=0xff191724
-    else
-      sketchybar --set "$NAME" \
-        background.color=0x22e0def4 \
         background.height=12 \
         background.corner_radius=6 \
-        icon.padding_left=4 \
-        icon.padding_right=4 \
-        icon.color=0x88908caa
+        icon.padding_left=10 \
+        icon.padding_right=10
+    else
+      sketchybar --animate overshoot 15 --set "$NAME" \
+        background.color=0x30e0def4 \
+        background.height=8 \
+        background.corner_radius=4 \
+        icon.padding_left=1 \
+        icon.padding_right=1
     fi
   '';
 
-  clockScript = pkgs.writeShellScript "sb-clock" ''
-    sketchybar --set clock label="$(date +'%H:%M  %a %d %b')"
+  clockHScript = pkgs.writeShellScript "sb-clock-h" ''
+    export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
+    sketchybar --set clock_h label="$(date +'%H')"
+  '';
+  clockMScript = pkgs.writeShellScript "sb-clock-m" ''
+    export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
+    sketchybar --set clock_m label="$(date +'%M')"
+  '';
+  clockDateScript = pkgs.writeShellScript "sb-clock-date" ''
+    export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
+    sketchybar --set clock_date label="$(date +'%d')"
+  '';
+  clockMonthScript = pkgs.writeShellScript "sb-clock-month" ''
+    export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
+    sketchybar --set clock_month label="$(date +'%b')"
   '';
 
   wifiScript = pkgs.writeShellScript "sb-wifi" ''
+    export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
     IP=$(ipconfig getifaddr en0 2>/dev/null)
     if [ -n "$IP" ]; then
-      sketchybar --set wifi icon="󰤨" icon.color=0xff9ccfd8 label="$IP"
+      sketchybar --set wifi icon="󰖩" icon.color=0xff9ccfd8 label="$IP"
     else
-      sketchybar --set wifi icon="󰤭" icon.color=0x886e6a86 label="off"
+      sketchybar --set wifi icon="󰤮" icon.color=0x886e6a86 label="off"
     fi
   '';
 
   volumeScript = pkgs.writeShellScript "sb-volume" ''
+    export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
     VOL=$(osascript -e "output volume of (get volume settings)" 2>/dev/null)
     MUTED=$(osascript -e "output muted of (get volume settings)" 2>/dev/null)
     if [ "$MUTED" = "true" ]; then
-      sketchybar --set volume icon="󰝟" icon.color=0x886e6a86 label="mute"
+      sketchybar --set volume icon="󰖁" icon.color=0x886e6a86 label="—"
     else
-      sketchybar --set volume icon="󰕾" icon.color=0xff9ccfd8 label="''${VOL}%"
+      sketchybar --set volume icon="󰕾" icon.color=0xff9ccfd8 label="''${VOL}"
     fi
   '';
 
+  brightnessScript = pkgs.writeShellScript "sb-brightness" ''
+    export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
+    BRIGHT=$(python3 -c "
+import ctypes
+ds = ctypes.CDLL('/System/Library/PrivateFrameworks/DisplayServices.framework/DisplayServices')
+ds.DisplayServicesGetBrightness.restype = ctypes.c_int
+val = ctypes.c_float()
+ds.DisplayServicesGetBrightness(1, ctypes.byref(val))
+print(int(val.value * 100))
+" 2>/dev/null)
+    [ -z "$BRIGHT" ] && BRIGHT="—"
+    sketchybar --set brightness icon="󰖨" icon.color=0xfff6c177 label="''${BRIGHT}"
+  '';
+
   batteryScript = pkgs.writeShellScript "sb-battery" ''
+    export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
     BATT=$(pmset -g batt 2>/dev/null | grep -o "[0-9]*%" | head -1 | tr -d "%")
     AC=$(pmset -g batt 2>/dev/null | grep -c "AC Power" || true)
     if [ "$AC" -gt 0 ]; then
-      sketchybar --set battery icon="󰂄" icon.color=0xff9ccfd8 label="''${BATT}%"
+      sketchybar --set battery icon="󱐋" icon.color=0xff9ccfd8 label="''${BATT}"
     elif [ "''${BATT:-100}" -le 15 ]; then
-      sketchybar --set battery icon="󰁺" icon.color=0xffeb6f92 label="''${BATT}%"
+      sketchybar --set battery icon="󱐋" icon.color=0xffeb6f92 label="''${BATT}"
     else
-      sketchybar --set battery icon="󰁾" icon.color=0xfff6c177 label="''${BATT}%"
+      sketchybar --set battery icon="󱐋" icon.color=0xfff6c177 label="''${BATT}"
     fi
   '';
 
@@ -74,7 +103,7 @@ let
       blur_radius=20 \
       color=0xe0191724 \
       border_width=0 \
-      margin=0 \
+      margin=10 \
       y_offset=0 \
       topmost=window
 
@@ -95,70 +124,134 @@ let
         icon="" \
         icon.color=0xffc4a7e7 \
         icon.font="JetBrainsMono Nerd Font Mono:Regular:22.0" \
-        icon.padding_left=12 \
-        icon.padding_right=8 \
+        icon.padding_left=16 \
+        icon.padding_right=12 \
         label.drawing=off
 
     # Register Aerospace workspace change event
     sketchybar --add event aerospace_workspace_change
 
-    # Workspaces 1–9: subscribe to event, click switches workspace
-    for i in 1 2 3 4 5 6 7 8 9; do
+    # Workspaces 1–6 (matches eww)
+    for i in 1 2 3 4 5 6; do
       sketchybar --add item "space.''${i}" left \
         --set "space.''${i}" \
           script="${spaceScript}" \
           click_script="aerospace workspace ''${i}" \
-          icon="''${i}" \
-          icon.font="JetBrainsMono Nerd Font:Bold:12.0" \
-          icon.color=0x88908caa \
-          icon.padding_left=4 \
-          icon.padding_right=4 \
-          background.color=0x22e0def4 \
-          background.corner_radius=6 \
-          background.height=12 \
+          icon.drawing=off \
           label.drawing=off \
-          padding_left=2 \
-          padding_right=2 \
+          background.color=0x30e0def4 \
+          background.corner_radius=4 \
+          background.height=8 \
+          icon=" " \
+          icon.font="JetBrainsMono Nerd Font:Regular:1.0" \
+          icon.drawing=on \
+          icon.padding_left=1 \
+          icon.padding_right=1 \
+          icon.color=0x00000000 \
+          label.drawing=off \
+          padding_left=6 \
+          padding_right=6 \
         --subscribe "space.''${i}" aerospace_workspace_change
     done
 
-    # WiFi
+    # Status items — consistent icon+label spacing
     sketchybar --add item wifi right \
       --set wifi \
         update_freq=10 \
         script="${wifiScript}" \
-        icon="󰤨" \
+        icon="󰖩" \
         icon.color=0xff9ccfd8 \
-        label="..."
+        icon.padding_left=10 \
+        icon.padding_right=4 \
+        label="..." \
+        label.padding_left=0 \
+        label.padding_right=10
 
-    # Volume
     sketchybar --add item volume right \
       --set volume \
         update_freq=3 \
         script="${volumeScript}" \
         icon="󰕾" \
         icon.color=0xff9ccfd8 \
-        label="..."
+        icon.padding_left=10 \
+        icon.padding_right=4 \
+        label="..." \
+        label.padding_left=0 \
+        label.padding_right=10
 
-    # Battery
+    sketchybar --add item brightness right \
+      --set brightness \
+        update_freq=5 \
+        script="${brightnessScript}" \
+        icon="󰖨" \
+        icon.color=0xfff6c177 \
+        icon.padding_left=10 \
+        icon.padding_right=4 \
+        label="..." \
+        label.padding_left=0 \
+        label.padding_right=10
+
     sketchybar --add item battery right \
       --set battery \
         update_freq=30 \
         script="${batteryScript}" \
-        icon="󰁾" \
+        icon="󱐋" \
         icon.color=0xfff6c177 \
-        label="..."
+        icon.padding_left=10 \
+        icon.padding_right=4 \
+        label="..." \
+        label.padding_left=0 \
+        label.padding_right=10
 
-    # Clock (leftmost on right side)
-    sketchybar --add item clock right \
-      --set clock \
-        update_freq=5 \
-        script="${clockScript}" \
+    # Clock — H · M   date Mon
+    sketchybar --add item clock_month right \
+      --set clock_month \
+        update_freq=1800 \
+        script="${clockMonthScript}" \
         icon.drawing=off \
-        label.font="JetBrainsMono Nerd Font:Bold:15.0" \
+        label.font="JetBrainsMono Nerd Font:Bold:13.0" \
+        label.color=0xff908caa \
+        label.padding_left=2 \
+        label.padding_right=18
+
+    sketchybar --add item clock_date right \
+      --set clock_date \
+        update_freq=1800 \
+        script="${clockDateScript}" \
+        icon.drawing=off \
+        label.font="JetBrainsMono Nerd Font:Bold:16.0" \
+        label.color=0xffe0def4 \
+        label.padding_left=10 \
+        label.padding_right=2
+
+    sketchybar --add item clock_m right \
+      --set clock_m \
+        update_freq=5 \
+        script="${clockMScript}" \
+        icon.drawing=off \
+        label.font="JetBrainsMono Nerd Font:Bold:18.0" \
+        label.color=0xffc4a7e7 \
+        label.padding_left=2 \
+        label.padding_right=2
+
+    sketchybar --add item clock_sep right \
+      --set clock_sep \
+        icon.drawing=off \
+        label="·" \
+        label.font="JetBrainsMono Nerd Font:Bold:18.0" \
+        label.color=0xffeb6f92 \
+        label.padding_left=4 \
+        label.padding_right=4
+
+    sketchybar --add item clock_h right \
+      --set clock_h \
+        update_freq=5 \
+        script="${clockHScript}" \
+        icon.drawing=off \
+        label.font="JetBrainsMono Nerd Font:Bold:18.0" \
         label.color=0xffebbcba \
-        label.padding_left=8 \
-        label.padding_right=8
+        label.padding_left=18 \
+        label.padding_right=0
 
     sketchybar --update
 

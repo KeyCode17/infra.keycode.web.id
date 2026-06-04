@@ -40,6 +40,8 @@
         if command -v fzf &> /dev/null; then
           eval "$(fzf --zsh)"
         fi
+
+        export PATH="$HOME/.cargo/bin:$PATH"
       '';
     };
 
