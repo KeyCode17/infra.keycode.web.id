@@ -370,7 +370,9 @@ in
       general = {
         lock_cmd = "pidof hyprlock || hyprlock";
         before_sleep_cmd = "loginctl lock-session";
-        after_sleep_cmd = "hyprctl dispatch dpms on";
+        # On resume: turn the screen back on and make sure the eww bar is up
+        # (it can get killed across a suspend/resume cycle on NVIDIA).
+        after_sleep_cmd = "hyprctl dispatch dpms on; eww open bar";
         ignore_dbus_inhibit = false;
       };
       listener = [
@@ -379,14 +381,12 @@ in
           on-timeout = "loginctl lock-session";
         }
         {
+          # Screen off on idle, back on with the bar when you return.
           timeout = 420;
           on-timeout = "hyprctl dispatch dpms off";
-          on-resume = "hyprctl dispatch dpms on";
+          on-resume = "hyprctl dispatch dpms on; eww open bar";
         }
-        {
-          timeout = 900;
-          on-timeout = "systemctl suspend";
-        }
+        # No idle auto-suspend (removed). Closing the lid still suspends.
       ];
     };
   };
