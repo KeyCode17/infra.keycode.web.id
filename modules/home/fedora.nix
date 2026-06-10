@@ -193,6 +193,9 @@
   # (enable, options, keymaps, plugins, extraPackages). Do not redefine
   # programs.nixvim here -- that would create a module merge conflict.
 
+  # Make nix-installed fonts discoverable to fontconfig (kitty, GTK, etc).
+  fonts.fontconfig.enable = true;
+
   home = {
     sessionVariables = {
       EDITOR = "nvim";
@@ -245,6 +248,10 @@
       ffmpeg
 
       wl-clipboard
+
+      # Fonts referenced across the config (terminal, neovim, bar, GTK)
+      nerd-fonts.caskaydia-cove
+      quicksand
 
       claude-code.packages.${pkgs.system}.default
     ];

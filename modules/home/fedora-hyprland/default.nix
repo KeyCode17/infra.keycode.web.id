@@ -289,7 +289,7 @@ in
       text = cmd[update:1000] echo "$(date +'%H:%M')"
       color = rgba(224, 222, 244, 0.95)
       font_size = 120
-      font_family = JetBrainsMono Nerd Font ExtraBold
+      font_family = CaskaydiaCove Nerd Font ExtraBold
       position = 0, 240
       halign = center
       valign = center
@@ -303,7 +303,7 @@ in
       text = cmd[update:30000] echo "$(date +'%A, %d %B %Y')"
       color = rgba(196, 167, 231, 0.90)
       font_size = 18
-      font_family = JetBrainsMono Nerd Font Medium
+      font_family = CaskaydiaCove Nerd Font Medium
       position = 0, 120
       halign = center
       valign = center
@@ -314,7 +314,7 @@ in
       text = $USER
       color = rgba(224, 222, 244, 0.95)
       font_size = 16
-      font_family = JetBrainsMono Nerd Font Bold
+      font_family = CaskaydiaCove Nerd Font Bold
       position = 0, -135
       halign = center
       valign = center
@@ -336,7 +336,7 @@ in
       check_color = rgba(156, 207, 216, 0.85)
       fail_color = rgba(235, 111, 146, 0.85)
       fail_text = <i>$FAIL <b>($ATTEMPTS)</b></i>
-      placeholder_text = <span font_family="JetBrainsMono Nerd Font" foreground="##c4a7e7cc">  Enter password</span>
+      placeholder_text = <span font_family="CaskaydiaCove Nerd Font" foreground="##c4a7e7cc">  Enter password</span>
       hide_input = false
       position = 0, -200
       halign = center
@@ -356,7 +356,7 @@ in
       border-size = 3;
       border-radius = 12;
       default-timeout = 5000;
-      font = "JetBrainsMono Nerd Font 11";
+      font = "CaskaydiaCove Nerd Font 11";
       width = 350;
       height = 150;
       margin = "16";
@@ -604,14 +604,14 @@ in
       cursor-theme = "Bibata-Modern-Classic";
       font-name = "Quicksand 11";
       document-font-name = "Quicksand 11";
-      monospace-font-name = "JetBrainsMono Nerd Font 11";
+      monospace-font-name = "CaskaydiaCove Nerd Font 11";
     };
   };
 
   # Kitty is installed natively (dnf) for proper GPU drivers. home-manager only
   # writes its config here so we don't shadow the native binary with a nix build.
   xdg.configFile."kitty/kitty.conf".text = ''
-    font_family JetBrainsMono Nerd Font
+    font_family CaskaydiaCove Nerd Font
     font_size 14
 
     background #191724
