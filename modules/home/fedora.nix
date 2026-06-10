@@ -3,6 +3,7 @@
   imports = [
     nixvim.homeModules.nixvim
     ./neovim/config.nix
+    ./fedora-hyprland
   ];
 
   programs.git = {
