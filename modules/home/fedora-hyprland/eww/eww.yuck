@@ -40,6 +40,8 @@
 
 (defpoll SSID    :interval "5s" :initial ""
   "nmcli -t -f active,ssid dev wifi 2>/dev/null | awk -F: '/^yes/{print $2; exit}' | cut -c1-12")
+(defpoll NETTYPE :interval "5s" :initial "none"
+  "nmcli -t -f TYPE,STATE device 2>/dev/null | awk -F: \'$2==\"connected\"&&($1==\"wifi\"||$1==\"ethernet\"){print $1; exit}\'")
 
 ;; ── widgets ─────────────────────────────────────
 (defwidget sep []
@@ -96,9 +98,9 @@
               :value BATT
               :cls {AC == "1" ? "m-batt batt-charge" : (BATT <= 15 ? "m-batt batt-low" : "m-batt")}))
     (eventbox :class "net-evt" :cursor "pointer" :onclick "nm-connection-editor"
-      (metric :icon {SSID != "" ? "" : ""}
-              :value {SSID != "" ? SSID : "off"}
-              :cls {SSID != "" ? "m-net" : "m-net net-off"}))
+      (metric :icon {NETTYPE == "wifi" ? "" : (NETTYPE == "ethernet" ? "" : "")}
+              :value {NETTYPE == "wifi" ? SSID : (NETTYPE == "ethernet" ? "LAN" : "off")}
+              :cls {NETTYPE == "none" ? "m-net net-off" : "m-net"}))
     (button :class "power" :onclick "$HOME/.local/bin/wofi-power &"
             :halign "center"
       (label :class "power-icon" :halign "center" :valign "center" :text ""))))
