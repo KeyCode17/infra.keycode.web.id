@@ -239,8 +239,8 @@ in
         "$mod, mouse_down, workspace, e+1"
         "$mod, mouse_up, workspace, e-1"
 
-        ", Print, exec, grim -g \"$(slurp)\" - | wl-copy"
-        "SHIFT, Print, exec, grim - | wl-copy"
+        ", Print, exec, $HOME/.local/bin/screenshot"
+        "SHIFT, Print, exec, grim -g \"$(slurp)\" - | wl-copy"
 
         "$mod, C, exec, cliphist list | wofi --dmenu | cliphist decode | wl-copy"
         "$mod SHIFT, V, exec, $HOME/.local/bin/clip-menu"
@@ -624,6 +624,61 @@ in
     '';
   };
 
+  # Screenshot / screen-record chooser (GNOME-style): pick region / window /
+  # whole screen, screenshot or record. Bound to Print.
+  home.file.".local/bin/screenshot" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      export PATH="$HOME/.nix-profile/bin:$PATH"
+      shotdir="$HOME/Pictures/Screenshots"; mkdir -p "$shotdir"
+      viddir="$HOME/Videos/Recordings";     mkdir -p "$viddir"
+
+      shot() {
+        f="$shotdir/shot-$(date +%Y%m%d-%H%M%S).png"
+        if grim "$@" "$f"; then
+          wl-copy < "$f"
+          notify-send -i "$f" "Screenshot saved" "$f"
+        fi
+      }
+
+      menu="  Region (selection)
+  Active window
+  Whole screen
+  Record region
+  Record whole screen"
+      pgrep -x wf-recorder >/dev/null && menu="  Stop recording
+$menu"
+
+      choice=$(printf '%s' "$menu" | rofi -dmenu -i -p "Capture" \
+               -theme "$HOME/.config/rofi/clip.rasi")
+      [ -z "$choice" ] && exit 0
+
+      case "$choice" in
+        *"Region (selection)")
+          geo=$(slurp) || exit 0; sleep 0.1; shot -g "$geo" ;;
+        *"Active window")
+          geo=$(hyprctl activewindow -j \
+                | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"')
+          shot -g "$geo" ;;
+        *"Whole screen")
+          shot ;;
+        *"Record region")
+          geo=$(slurp) || exit 0
+          f="$viddir/rec-$(date +%Y%m%d-%H%M%S).mp4"
+          notify-send "Recording started" "Run Print again -> Stop recording"
+          setsid -f wf-recorder -g "$geo" -f "$f" >/dev/null 2>&1 ;;
+        *"Record whole screen")
+          f="$viddir/rec-$(date +%Y%m%d-%H%M%S).mp4"
+          notify-send "Recording started" "Run Print again -> Stop recording"
+          setsid -f wf-recorder -f "$f" >/dev/null 2>&1 ;;
+        *"Stop recording")
+          pkill -INT -x wf-recorder
+          notify-send "Recording stopped" "Saved to $viddir" ;;
+      esac
+    '';
+  };
+
   # Clipboard manager: cliphist history + pin/star support via rofi.
   # Alt+P pins the highlighted entry, Alt+X unpins. Enter copies it.
   home.file.".local/bin/clip-menu" = {
@@ -888,6 +943,9 @@ in
     cliphist
     wl-clipboard
     rofi
+    grim
+    slurp
+    wf-recorder
     libnotify
     jq
     socat
