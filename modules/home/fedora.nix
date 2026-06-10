@@ -95,17 +95,8 @@
     enableZshIntegration = true;
   };
 
-  programs.ssh = {
-    enable = true;
-    enableDefaultConfig = false;
-    matchBlocks = {
-      "*" = {
-        extraOptions = {
-          AddKeysToAgent = "yes";
-        };
-      };
-    };
-  };
+  # NOTE: ssh config is managed manually outside home-manager (a real ~/.ssh/config
+  # with custom hosts). Leaving programs.ssh off so HM doesn't clobber it.
 
   programs.tmux = {
     enable = true;
