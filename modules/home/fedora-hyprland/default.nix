@@ -624,8 +624,9 @@ in
     '';
   };
 
-  # Screenshot / screen-record chooser (GNOME-style): pick region / window /
-  # whole screen, screenshot or record. Bound to Print.
+  # Screenshot / screen-record chooser as a horizontal icon toolbar (Print).
+  # Screenshot: region / window / screen. Record: pick area then audio
+  # (none / system / mic / both). Icons via printf \u so no raw glyphs in file.
   home.file.".local/bin/screenshot" = {
     executable = true;
     text = ''
@@ -633,51 +634,121 @@ in
       export PATH="$HOME/.nix-profile/bin:$PATH"
       shotdir="$HOME/Pictures/Screenshots"; mkdir -p "$shotdir"
       viddir="$HOME/Videos/Recordings";     mkdir -p "$viddir"
+      RASI="$HOME/.config/rofi/capture.rasi"
+
+      I_REGION=$(printf ''); I_WIN=$(printf ''); I_SCREEN=$(printf '')
+      I_REC=$(printf '');    I_STOP=$(printf ''); I_BACK=$(printf '')
+      I_MUTE=$(printf '');   I_SYS=$(printf '');  I_MIC=$(printf '')
+      I_BOTH=$(printf '')
+
+      pick() { rofi -dmenu -i -p "$1" -theme "$RASI" -mesg "$2"; }
 
       shot() {
         f="$shotdir/shot-$(date +%Y%m%d-%H%M%S).png"
-        if grim "$@" "$f"; then
-          wl-copy < "$f"
-          notify-send -i "$f" "Screenshot saved" "$f"
-        fi
+        if grim "$@" "$f"; then wl-copy < "$f"; notify-send -i "$f" "Screenshot saved" "$f"; fi
       }
 
-      menu="  Region (selection)
-  Active window
-  Whole screen
-  Record region
-  Record whole screen"
-      pgrep -x wf-recorder >/dev/null && menu="  Stop recording
-$menu"
+      stop_rec() {
+        pkill -INT -x wf-recorder
+        if [ -f "$viddir/.rec-modules" ]; then
+          for m in $(cat "$viddir/.rec-modules"); do pactl unload-module "$m" 2>/dev/null; done
+          rm -f "$viddir/.rec-modules"
+        fi
+        notify-send "Recording stopped" "Saved in $viddir"
+      }
 
-      choice=$(printf '%s' "$menu" | rofi -dmenu -i -p "Capture" \
-               -theme "$HOME/.config/rofi/clip.rasi")
-      [ -z "$choice" ] && exit 0
+      start_rec() { # $1 = region|screen   $2 = none|system|mic|both
+        args=(); SINK=$(pactl get-default-sink 2>/dev/null); SRC=$(pactl get-default-source 2>/dev/null)
+        if [ "$1" = region ]; then geo=$(slurp) || exit 0; args+=(-g "$geo"); fi
+        case "$2" in
+          system) [ -n "$SINK" ] && args+=(--audio="$SINK.monitor") || args+=(--audio) ;;
+          mic)    [ -n "$SRC" ]  && args+=(--audio="$SRC")          || args+=(--audio) ;;
+          both)
+            if [ -n "$SINK" ] && [ -n "$SRC" ]; then
+              n=$(pactl load-module module-null-sink sink_name=rec_mix sink_properties=device.description=rec_mix)
+              l1=$(pactl load-module module-loopback source="$SRC" sink=rec_mix latency_msec=20)
+              l2=$(pactl load-module module-loopback source="$SINK.monitor" sink=rec_mix latency_msec=20)
+              printf '%s %s %s\n' "$n" "$l1" "$l2" > "$viddir/.rec-modules"
+              args+=(--audio=rec_mix.monitor)
+            else args+=(--audio); fi ;;
+        esac
+        f="$viddir/rec-$(date +%Y%m%d-%H%M%S).mp4"
+        notify-send "Recording started" "Press Print -> Stop recording"
+        setsid -f wf-recorder "''${args[@]}" -f "$f" >/dev/null 2>&1
+      }
 
-      case "$choice" in
-        *"Region (selection)")
-          geo=$(slurp) || exit 0; sleep 0.1; shot -g "$geo" ;;
-        *"Active window")
-          geo=$(hyprctl activewindow -j \
-                | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"')
-          shot -g "$geo" ;;
-        *"Whole screen")
-          shot ;;
-        *"Record region")
-          geo=$(slurp) || exit 0
-          f="$viddir/rec-$(date +%Y%m%d-%H%M%S).mp4"
-          notify-send "Recording started" "Run Print again -> Stop recording"
-          setsid -f wf-recorder -g "$geo" -f "$f" >/dev/null 2>&1 ;;
-        *"Record whole screen")
-          f="$viddir/rec-$(date +%Y%m%d-%H%M%S).mp4"
-          notify-send "Recording started" "Run Print again -> Stop recording"
-          setsid -f wf-recorder -f "$f" >/dev/null 2>&1 ;;
-        *"Stop recording")
-          pkill -INT -x wf-recorder
-          notify-send "Recording stopped" "Saved to $viddir" ;;
+      main="$I_REGION  Region
+$I_WIN  Window
+$I_SCREEN  Screen
+$I_REC  Record"
+      pgrep -x wf-recorder >/dev/null && main="$I_STOP  Stop recording
+$main"
+
+      c=$(printf '%s' "$main" | pick "Capture" "Screenshot or screen record")
+      case "$c" in
+        *"Stop recording") stop_rec; exit 0 ;;
+        *Region) geo=$(slurp) || exit 0; sleep 0.1; shot -g "$geo"; exit 0 ;;
+        *Window) geo=$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"'); shot -g "$geo"; exit 0 ;;
+        *Screen) shot; exit 0 ;;
+        *Record) : ;;
+        *) exit 0 ;;
       esac
+
+      sc=$(printf '%s' "$I_REGION  Region
+$I_SCREEN  Whole screen
+$I_BACK  Back" | pick "Record area" "What to record")
+      case "$sc" in *Region) SCOPE=region ;; *"Whole screen") SCOPE=screen ;; *) exit 0 ;; esac
+
+      au=$(printf '%s' "$I_MUTE  No audio
+$I_SYS  System
+$I_MIC  Mic
+$I_BOTH  System + Mic" | pick "Record audio" "Audio source")
+      case "$au" in
+        *"No audio") AUD=none ;; *System) AUD=system ;;
+        *Mic) AUD=mic ;; *"System + Mic") AUD=both ;; *) exit 0 ;;
+      esac
+      start_rec "$SCOPE" "$AUD"
     '';
   };
+
+  home.file.".config/rofi/capture.rasi".text = ''
+    * {
+      font:   "CaskaydiaCove Nerd Font 11";
+      bg:     #2e3440;
+      bg-alt: #3b4252;
+      fg:     #d8dee9;
+      accent: #81a1c1;
+      muted:  #4c566a;
+      background-color: transparent;
+      text-color: @fg;
+    }
+    configuration { show-icons: false; }
+    window {
+      transparency: "real";
+      background-color: @bg;
+      border: 2px;
+      border-color: @accent;
+      border-radius: 18px;
+      width: 560px;
+      location: center;
+    }
+    mainbox { padding: 20px; spacing: 16px; children: [ message, listview ]; }
+    message { border: 0; padding: 0; }
+    textbox {
+      text-color: @accent;
+      horizontal-align: 0.5;
+      font: "CaskaydiaCove Nerd Font Bold 13";
+    }
+    listview { columns: 5; lines: 1; spacing: 12px; }
+    element {
+      orientation: vertical;
+      padding: 18px 6px;
+      border-radius: 14px;
+      background-color: @bg-alt;
+    }
+    element selected { background-color: @accent; text-color: @bg; }
+    element-text { horizontal-align: 0.5; vertical-align: 0.5; }
+  '';
 
   # Clipboard manager: cliphist history + pin/star support via rofi.
   # Alt+P pins the highlighted entry, Alt+X unpins. Enter copies it.
