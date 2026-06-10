@@ -243,6 +243,7 @@ in
         "SHIFT, Print, exec, grim - | wl-copy"
 
         "$mod, C, exec, cliphist list | wofi --dmenu | cliphist decode | wl-copy"
+        "$mod SHIFT, V, exec, $HOME/.local/bin/clip-menu"
 
         "$mod SHIFT, C, exec, hyprpicker -a"
 
@@ -625,6 +626,114 @@ in
     '';
   };
 
+  # Clipboard manager: cliphist history + pin/star support via rofi.
+  # Alt+P pins the highlighted entry, Alt+X unpins. Enter copies it.
+  home.file.".local/bin/clip-menu" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      PINS="''${XDG_DATA_HOME:-$HOME/.local/share}/cliphist-pins"
+      mkdir -p "$(dirname "$PINS")"; touch "$PINS"
+      star="★ "
+
+      prev() { base64 -d 2>/dev/null | tr '\n\t' '  ' | head -c 70; }
+
+      build() {
+        while IFS= read -r b64; do
+          [ -n "$b64" ] || continue
+          printf '%s%s\n' "$star" "$(printf '%s' "$b64" | prev)"
+        done < "$PINS"
+        cliphist list 2>/dev/null
+      }
+
+      while true; do
+        sel=$(build | rofi -dmenu -i -p "Clipboard" \
+              -theme "$HOME/.config/rofi/clip.rasi" \
+              -mesg "Alt+P pin   Alt+X unpin   Enter copy" \
+              -kb-custom-1 "Alt+p" -kb-custom-2 "Alt+x")
+        rc=$?
+        [ -z "$sel" ] && exit 0
+
+        case $rc in
+          0)
+            if [[ "$sel" == "$star"* ]]; then
+              target=''${sel#"$star"}
+              while IFS= read -r b64; do
+                [ "$(printf '%s' "$b64" | prev)" = "$target" ] && {
+                  printf '%s' "$b64" | base64 -d | wl-copy; exit 0; }
+              done < "$PINS"
+            else
+              printf '%s' "$sel" | cliphist decode | wl-copy
+            fi
+            exit 0
+            ;;
+          10)
+            if [[ "$sel" != "$star"* ]]; then
+              raw=$(printf '%s' "$sel" | cliphist decode | base64 -w0)
+              grep -qxF "$raw" "$PINS" || printf '%s\n' "$raw" >> "$PINS"
+            fi
+            ;;
+          11)
+            if [[ "$sel" == "$star"* ]]; then
+              target=''${sel#"$star"}
+              tmp=$(mktemp)
+              while IFS= read -r b64; do
+                [ "$(printf '%s' "$b64" | prev)" = "$target" ] || printf '%s\n' "$b64"
+              done < "$PINS" > "$tmp"
+              mv "$tmp" "$PINS"
+            fi
+            ;;
+          *) exit 0 ;;
+        esac
+      done
+    '';
+  };
+
+  home.file.".config/rofi/clip.rasi".text = ''
+    * {
+      bg:     #2e3440;
+      bg-alt: #3b4252;
+      fg:     #d8dee9;
+      accent: #81a1c1;
+      muted:  #4c566a;
+    }
+    window {
+      background-color: @bg;
+      border: 2px;
+      border-color: @accent;
+      border-radius: 16px;
+      width: 680px;
+    }
+    mainbox { padding: 12px; }
+    inputbar {
+      background-color: @bg-alt;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin: 0 0 8px 0;
+      children: [ prompt, entry ];
+    }
+    prompt { text-color: @accent; margin: 0 8px 0 0; }
+    entry  { text-color: @fg; placeholder: "Search clipboard"; placeholder-color: @muted; }
+    message { margin: 0 0 8px 0; }
+    textbox {
+      background-color: @bg-alt;
+      text-color: @accent;
+      border-radius: 8px;
+      padding: 6px 12px;
+    }
+    listview { lines: 10; scrollbar: false; spacing: 2px; }
+    element {
+      padding: 8px 12px;
+      border-radius: 8px;
+      text-color: @fg;
+    }
+    element selected {
+      background-color: @accent;
+      text-color: @bg;
+    }
+    element-text { text-color: inherit; }
+  '';
+
   gtk = {
     enable = true;
 
@@ -792,6 +901,7 @@ in
     swayosd
     cliphist
     wl-clipboard
+    rofi
     libnotify
     jq
     socat
