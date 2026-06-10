@@ -127,6 +127,7 @@ in
 
       cursor = {
         default_monitor = "";
+        no_hardware_cursors = true; # NVIDIA: avoids invisible/garbled cursor
       };
 
       env = [
@@ -135,7 +136,19 @@ in
         "NIXOS_OZONE_WL,1"
         "ELECTRON_OZONE_PLATFORM_HINT,auto"
         "MOZ_ENABLE_WAYLAND,1"
+
+        # Hybrid Intel + NVIDIA (Optimus). Intel iGPU = /dev/dri/card1 drives the
+        # eDP-1 panel; make it the primary scanout device so Hyprland starts,
+        # with the NVIDIA card available as secondary.
+        "AQ_DRM_DEVICES,/dev/dri/card1:/dev/dri/card0"
+        "__GLX_VENDOR_LIBRARY_NAME,nvidia"
+        "LIBVA_DRIVER_NAME,nvidia"
+        "NVD_BACKEND,direct"
       ];
+
+      debug = {
+        disable_logs = false;
+      };
 
       misc = {
         force_default_wallpaper = 0;
@@ -143,19 +156,22 @@ in
         disable_splash_rendering = true;
       };
 
-      windowrule = [
-        "float on, match:class ^(pavucontrol)$"
-        "float on, match:class ^(nm-connection-editor)$"
-        "float on, match:class ^(org.gnome.Calculator)$"
-        "float on, match:title ^(Picture-in-Picture)$"
-        "opacity 1.0 0.92, match:class ^(kitty)$"
-        "opacity 1.0 0.92, match:class ^(Alacritty)$"
-        "opacity 0.9, match:class ^(code)$"
+      # Hyprland 0.51 (Fedora COPR) syntax: windowrulev2 with class:/title:
+      windowrulev2 = [
+        "float, class:^(pavucontrol)$"
+        "float, class:^(nm-connection-editor)$"
+        "float, class:^(org.gnome.Calculator)$"
+        "float, title:^(Picture-in-Picture)$"
+        "opacity 1.0 0.92, class:^(kitty)$"
+        "opacity 1.0 0.92, class:^(Alacritty)$"
+        "opacity 0.9, class:^(code)$"
       ];
 
       layerrule = [
-        "blur on, ignore_alpha 0.3, match:namespace gtk-layer-shell"
-        "blur on, ignore_alpha 0.3, match:namespace wofi"
+        "blur, gtk-layer-shell"
+        "ignorealpha 0.3, gtk-layer-shell"
+        "blur, wofi"
+        "ignorealpha 0.3, wofi"
       ];
 
       "$mod" = "SUPER";
