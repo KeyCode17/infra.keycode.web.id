@@ -639,55 +639,49 @@ in
       export PATH="$HOME/.nix-profile/bin:$PATH"
       PINS="''${XDG_DATA_HOME:-$HOME/.local/share}/cliphist-pins"
       mkdir -p "$(dirname "$PINS")"; touch "$PINS"
-      star="★ "
+      TAB=$'\t'
 
-      prev() { base64 -d 2>/dev/null | tr '\n\t' '  ' | head -c 70; }
-
-      build() {
-        while IFS= read -r b64; do
-          [ -n "$b64" ] || continue
-          printf '%s%s\n' "$star" "$(printf '%s' "$b64" | prev)"
-        done < "$PINS"
-        cliphist list 2>/dev/null
-      }
+      prev() { base64 -d 2>/dev/null | tr '\n\t' '  ' | sed 's/^ *//' | cut -c1-72; }
 
       while true; do
-        sel=$(build | rofi -dmenu -i -p "Clipboard" \
-              -theme "$HOME/.config/rofi/clip.rasi" \
-              -mesg "Alt+P pin   Alt+X unpin   Enter copy" \
+        KIND=(); DATA=(); DISP=()
+        # pinned entries first
+        while IFS= read -r b64; do
+          [ -n "$b64" ] || continue
+          KIND+=("pin"); DATA+=("$b64")
+          DISP+=("★  $(printf '%s' "$b64" | prev)")
+        done < "$PINS"
+        # cliphist history (strip the leading "id<tab>" for display)
+        while IFS= read -r line; do
+          [ -n "$line" ] || continue
+          KIND+=("hist"); DATA+=("$line")
+          DISP+=("    ''${line#*$TAB}")
+        done < <(cliphist list 2>/dev/null)
+
+        [ ''${#DISP[@]} -eq 0 ] && { notify-send -u low "Clipboard" "History is empty"; exit 0; }
+
+        idx=$(printf '%s\n' "''${DISP[@]}" | rofi -dmenu -i -format i \
+              -p "Clipboard" -theme "$HOME/.config/rofi/clip.rasi" \
+              -mesg "Alt+P pin     Alt+X unpin     Enter copy" \
               -kb-custom-1 "Alt+p" -kb-custom-2 "Alt+x")
         rc=$?
-        [ -z "$sel" ] && exit 0
+        [ -z "$idx" ] && exit 0
+        kind="''${KIND[$idx]}"; data="''${DATA[$idx]}"
 
         case $rc in
           0)
-            if [[ "$sel" == "$star"* ]]; then
-              target=''${sel#"$star"}
-              while IFS= read -r b64; do
-                [ "$(printf '%s' "$b64" | prev)" = "$target" ] && {
-                  printf '%s' "$b64" | base64 -d | wl-copy; exit 0; }
-              done < "$PINS"
-            else
-              printf '%s' "$sel" | cliphist decode | wl-copy
-            fi
-            exit 0
-            ;;
-          10)
-            if [[ "$sel" != "$star"* ]]; then
-              raw=$(printf '%s' "$sel" | cliphist decode | base64 -w0)
+            if [ "$kind" = pin ]; then printf '%s' "$data" | base64 -d | wl-copy
+            else printf '%s' "$data" | cliphist decode | wl-copy; fi
+            exit 0 ;;
+          10)  # Alt+P: pin a history item
+            if [ "$kind" = hist ]; then
+              raw=$(printf '%s' "$data" | cliphist decode | base64 -w0)
               grep -qxF "$raw" "$PINS" || printf '%s\n' "$raw" >> "$PINS"
-            fi
-            ;;
-          11)
-            if [[ "$sel" == "$star"* ]]; then
-              target=''${sel#"$star"}
-              tmp=$(mktemp)
-              while IFS= read -r b64; do
-                [ "$(printf '%s' "$b64" | prev)" = "$target" ] || printf '%s\n' "$b64"
-              done < "$PINS" > "$tmp"
-              mv "$tmp" "$PINS"
-            fi
-            ;;
+            fi ;;
+          11)  # Alt+X: unpin a pinned item
+            if [ "$kind" = pin ]; then
+              grep -vxF "$data" "$PINS" > "$PINS.tmp" && mv "$PINS.tmp" "$PINS"
+            fi ;;
           *) exit 0 ;;
         esac
       done
@@ -696,47 +690,40 @@ in
 
   home.file.".config/rofi/clip.rasi".text = ''
     * {
+      font:   "CaskaydiaCove Nerd Font 11";
       bg:     #2e3440;
       bg-alt: #3b4252;
       fg:     #d8dee9;
       accent: #81a1c1;
       muted:  #4c566a;
+      background-color: transparent;
+      text-color: @fg;
     }
+    configuration { show-icons: false; }
     window {
+      transparency: "real";
       background-color: @bg;
       border: 2px;
       border-color: @accent;
       border-radius: 16px;
-      width: 680px;
+      width: 600px;
     }
-    mainbox { padding: 12px; }
+    mainbox { padding: 14px; spacing: 10px; }
     inputbar {
       background-color: @bg-alt;
-      border-radius: 10px;
-      padding: 10px 12px;
-      margin: 0 0 8px 0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      spacing: 8px;
       children: [ prompt, entry ];
     }
-    prompt { text-color: @accent; margin: 0 8px 0 0; }
-    entry  { text-color: @fg; placeholder: "Search clipboard"; placeholder-color: @muted; }
-    message { margin: 0 0 8px 0; }
-    textbox {
-      background-color: @bg-alt;
-      text-color: @accent;
-      border-radius: 8px;
-      padding: 6px 12px;
-    }
-    listview { lines: 10; scrollbar: false; spacing: 2px; }
-    element {
-      padding: 8px 12px;
-      border-radius: 8px;
-      text-color: @fg;
-    }
-    element selected {
-      background-color: @accent;
-      text-color: @bg;
-    }
-    element-text { text-color: inherit; }
+    prompt { text-color: @accent; }
+    entry  { placeholder: "Search…"; placeholder-color: @muted; }
+    message { border: 0; padding: 0; }
+    textbox { text-color: @muted; padding: 2px 6px; }
+    listview { lines: 12; scrollbar: false; spacing: 3px; }
+    element { padding: 9px 12px; border-radius: 10px; }
+    element selected { background-color: @accent; text-color: @bg; }
+    element-text { text-color: inherit; vertical-align: 0.5; }
   '';
 
   gtk = {
