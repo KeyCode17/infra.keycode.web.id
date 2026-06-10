@@ -251,7 +251,6 @@
 
       # Fonts referenced across the config (terminal, neovim, bar, GTK)
       nerd-fonts.caskaydia-cove
-      quicksand
 
       claude-code.packages.${pkgs.system}.default
     ];

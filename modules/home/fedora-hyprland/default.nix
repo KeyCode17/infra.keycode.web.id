@@ -424,7 +424,7 @@ in
 
     style = ''
       * {
-        font-family: "SF Pro Display", "Quicksand", "Inter", sans-serif;
+        font-family: "CaskaydiaCove Nerd Font", sans-serif;
         font-size: 15px;
       }
 
@@ -560,7 +560,7 @@ in
     };
 
     font = {
-      name = "Quicksand";
+      name = "CaskaydiaCove Nerd Font";
       size = 11;
     };
 
@@ -602,8 +602,8 @@ in
       gtk-theme = "rose-pine";
       icon-theme = "rose-pine";
       cursor-theme = "Bibata-Modern-Classic";
-      font-name = "Quicksand 11";
-      document-font-name = "Quicksand 11";
+      font-name = "CaskaydiaCove Nerd Font 11";
+      document-font-name = "CaskaydiaCove Nerd Font 11";
       monospace-font-name = "CaskaydiaCove Nerd Font 11";
     };
   };
@@ -691,7 +691,7 @@ in
 
     label {
       color: #e0def4;
-      font-family: "Quicksand", sans-serif;
+      font-family: "CaskaydiaCove Nerd Font", sans-serif;
       font-weight: 600;
       font-size: 14px;
     }
