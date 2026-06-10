@@ -1,4 +1,4 @@
-// Rose Pine - eww side bar styling
+// Nord - eww side bar styling
 
 $base:      #2e3440;
 $surface:   #3b4252;
@@ -18,8 +18,8 @@ $iris:      #81a1c1;
 }
 
 .panel {
-  background-color: rgba(25, 23, 36, 0.55);
-  border: 2px solid rgba(196, 167, 231, 0.55);
+  background-color: rgba(46, 52, 64, 0.55);
+  border: 2px solid rgba(129, 161, 193, 0.55);
   border-radius: 26px;
   margin: 16px 0 16px 8px;
   padding: 18px 0;
@@ -35,14 +35,14 @@ $iris:      #81a1c1;
 }
 
 .sep {
-  background-color: rgba(196, 167, 231, 0.18);
+  background-color: rgba(129, 161, 193, 0.18);
   border-radius: 1px;
   margin: 2px 16px;
 }
 
 // workspaces
 .ws {
-  background-color: rgba(224, 222, 244, 0.16);
+  background-color: rgba(216, 222, 233, 0.16);
   border-radius: 10px;
   min-width: 12px;
   min-height: 12px;
@@ -50,7 +50,7 @@ $iris:      #81a1c1;
 }
 
 .ws:hover {
-  background-color: rgba(196, 167, 231, 0.55);
+  background-color: rgba(129, 161, 193, 0.55);
 }
 
 .ws-on {
@@ -61,7 +61,7 @@ $iris:      #81a1c1;
 
 // caffeine indicator (only visible when active)
 .caffeine-btn {
-  background-color: rgba(246, 193, 119, 0.16);
+  background-color: rgba(235, 203, 139, 0.16);
   border-radius: 12px;
   min-width: 30px;
   min-height: 30px;
@@ -69,7 +69,7 @@ $iris:      #81a1c1;
 }
 
 .caffeine-btn:hover {
-  background-color: rgba(246, 193, 119, 0.32);
+  background-color: rgba(235, 203, 139, 0.32);
 }
 
 .caffeine-ico {
@@ -161,5 +161,5 @@ $iris:      #81a1c1;
 
 .power:hover {
   background-color: $love;
-  box-shadow: 0 0 14px rgba(235, 111, 146, 0.75);
+  box-shadow: 0 0 14px rgba(191, 97, 106, 0.75);
 }
