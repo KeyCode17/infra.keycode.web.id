@@ -169,9 +169,6 @@ in
         "float, class:^(nm-connection-editor)$"
         "float, class:^(org.gnome.Calculator)$"
         "float, title:^(Picture-in-Picture)$"
-        "float, class:^(sysmon)$"
-        "size 1000 640, class:^(sysmon)$"
-        "center, class:^(sysmon)$"
         "opacity 1.0 0.92, class:^(kitty)$"
         "opacity 1.0 0.92, class:^(Alacritty)$"
         "opacity 0.9, class:^(code)$"
@@ -622,35 +619,6 @@ in
             v=$(wpctl get-volume "$sink" | awk '{print int($2*100)}')
             notify-send -u low -h "$sync" -h "int:value:''${v}" "Volume  ''${v}%"
           fi
-          ;;
-      esac
-    '';
-  };
-
-  # Detailed system info for the eww bar tooltips (cpu / ram / disk).
-  home.file.".local/bin/sysinfo" = {
-    executable = true;
-    text = ''
-      #!/usr/bin/env bash
-      case "$1" in
-        cpu)
-          read -r l1 l5 l15 _ < /proc/loadavg
-          echo "CPU · $(nproc) cores"
-          echo "Load avg: $l1  $l5  $l15"
-          echo ""
-          echo "Top processes:"
-          ps -eo pcpu,comm --sort=-pcpu | awk 'NR>1 && NR<=5 {printf "  %5.1f%%  %s\n",$1,$2}'
-          ;;
-        ram)
-          free -h | awk '/^Mem:/{print "RAM · "$3" / "$2" used"} /^Swap:/{print "Swap · "$3" / "$2}'
-          echo ""
-          echo "Top processes:"
-          ps -eo pmem,comm --sort=-pmem | awk 'NR>1 && NR<=5 {printf "  %5.1f%%  %s\n",$1,$2}'
-          ;;
-        disk)
-          echo "Storage"
-          df -h -x tmpfs -x devtmpfs -x efivarfs --output=target,used,size,pcent 2>/dev/null \
-            | awk 'NR>1 {printf "  %-14s %s / %s (%s)\n",$1,$2,$3,$4}' | head -6
           ;;
       esac
     '';
