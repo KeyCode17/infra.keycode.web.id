@@ -10,6 +10,9 @@
   wslUsername = "ms";
   wslHostname = "wsl";
 
+  fedoraUsername = "keycode";
+  fedoraHostname = "fedora";
+
   vpsHostingerUsername = "ms";
   vpsHostingerHostname = "msdqn";
   vpsHostingerIP = "72.62.125.38";

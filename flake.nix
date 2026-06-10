@@ -205,6 +205,7 @@
         enableRust
         enableVolta
         enableGolang
+        fedoraUsername
         ;
       secretsFile = ./secrets/secrets.yaml;
 
@@ -442,6 +443,20 @@
           overlays = [ nix-on-droid.overlays.default ];
         };
         modules = [ ./hosts/android ];
+      };
+
+      # Fedora (and other non-NixOS Linux): standalone home-manager.
+      # Apply with: home-manager switch --flake .#<fedoraUsername>
+      homeConfigurations.${fedoraUsername} = home-manager.lib.homeManagerConfiguration {
+        pkgs = import nixpkgs {
+          system = "x86_64-linux";
+          config.allowUnfree = true;
+        };
+        extraSpecialArgs = {
+          username = fedoraUsername;
+          inherit nixvim claude-code;
+        };
+        modules = [ ./hosts/fedora ];
       };
 
       devShells = forAllSystems (

@@ -10,6 +10,9 @@
   wslUsername = "your-username";
   wslHostname = "wsl";
 
+  fedoraUsername = "your-username";
+  fedoraHostname = "fedora";
+
   vpsHostingerUsername = "your-username";
   vpsHostingerHostname = "your-hostname";
   vpsHostingerIP = "0.0.0.0";

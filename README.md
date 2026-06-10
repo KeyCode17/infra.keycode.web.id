@@ -158,6 +158,33 @@ sudo nixos-generate-config --show-hardware-config > modules/nixos/hardware.nix
 sudo nixos-rebuild switch --flake .#workstation
 ```
 
+### Fedora (home-manager standalone)
+
+Fedora keeps its own kernel, system, and desktop. Nix manages only your user
+environment (dotfiles + CLI packages) — no system-level/declarative OS management.
+
+```bash
+# Prerequisites: Determinate Nix
+# https://determinate.systems/posts/determinate-nix-installer
+curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
+
+# Clone the repo
+git clone git@github.com:maulanasdqn/nix-anywhere.git ~/.config/nix
+cd ~/.config/nix
+
+# Create your configuration (set fedoraUsername to your Linux username)
+cp config.example.nix config.nix
+nvim config.nix
+
+# First-time apply (bootstraps home-manager)
+nix run home-manager/master -- switch --flake .#keycode
+
+# Subsequent updates
+home-manager switch --flake .#keycode
+```
+
+Replace `keycode` with your `fedoraUsername`.
+
 ### VPS Deployment (nixos-anywhere)
 
 Deploy NixOS to a fresh VPS running Ubuntu/Debian:
