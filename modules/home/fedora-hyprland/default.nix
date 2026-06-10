@@ -410,6 +410,8 @@ in
       After = [ "graphical-session.target" ];
     };
     Service = {
+      # PATH so widget onclick handlers (pavucontrol, etc.) resolve nix tools.
+      Environment = "PATH=%h/.nix-profile/bin:/usr/local/bin:/usr/bin:/bin";
       ExecStart = "${pkgs.eww}/bin/eww daemon --no-daemonize";
       ExecStartPost = "${pkgs.bash}/bin/bash -c 'sleep 1; ${pkgs.eww}/bin/eww open bar'";
       Restart = "on-failure";

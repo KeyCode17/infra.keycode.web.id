@@ -80,9 +80,13 @@
 (defwidget tray []
   (box :class "tray" :orientation "v" :space-evenly false :spacing 12
        :valign "end" :hexpand true
-    (metric :icon {MUTED == "true" ? "" : ""}
-            :value {MUTED == "true" ? "—" : "${VOL}"}
-            :cls "m-vol")
+    (eventbox :class "vol-evt" :cursor "pointer"
+              :onclick "pavucontrol"
+              :onrightclick "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+              :onscroll "[ {} = up ] && wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+ || wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
+      (metric :icon {MUTED == "true" ? "" : ""}
+              :value {MUTED == "true" ? "—" : "${VOL}"}
+              :cls "m-vol"))
     (metric :icon "" :value BRIGHT :cls "m-bright")
     (metric :icon "" :value CPU :cls "m-cpu")
     (metric :icon "" :value RAM :cls "m-ram")
