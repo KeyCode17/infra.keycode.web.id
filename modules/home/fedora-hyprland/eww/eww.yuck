@@ -82,9 +82,9 @@
             :value {MUTED == "true" ? "—" : "${VOL}"}
             :cls "m-vol")
     (metric :icon "" :value BRIGHT :cls "m-bright")
-    (metric :icon "" :value CPU  :cls "m-cpu")
-    (metric :icon "" :value RAM  :cls "m-ram")
-    (metric :icon "" :value DISK :cls "m-disk")
+    (metric :icon "" :value CPU  :cls "m-cpu")
+    (metric :icon "" :value RAM  :cls "m-ram")
+    (metric :icon "" :value DISK :cls "m-disk")
     (metric :icon {AC == "1" ? "" : ""}
             :value BATT
             :cls {AC == "1" ? "m-batt batt-charge" : (BATT <= 15 ? "m-batt batt-low" : "m-batt")})
