@@ -46,10 +46,14 @@ in
       ];
 
       exec-once = [
+        # Give systemd user services the Wayland env (plain Hyprland doesn't
+        # reach graphical-session.target, so daemons must be started explicitly).
+        "systemctl --user import-environment WAYLAND_DISPLAY HYPRLAND_INSTANCE_SIGNATURE XDG_CURRENT_DESKTOP"
         "hyprctl setcursor Bibata-Modern-Classic 32"
         "swaybg -c 2e3440"
         "eww open bar"
-        "swayosd-server"
+        "mako"
+        "systemctl --user start hypridle.service"
         "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
         "wl-paste --type text --watch cliphist store"
         "wl-paste --type image --watch cliphist store"
@@ -249,14 +253,14 @@ in
       ];
 
       bindel = [
-        ", XF86AudioRaiseVolume, exec, wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+"
-        ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
-        ", XF86MonBrightnessUp, exec, brightnessctl set 5%+"
-        ", XF86MonBrightnessDown, exec, brightnessctl set 5%-"
+        ", XF86AudioRaiseVolume, exec, $HOME/.local/bin/osd vol-up"
+        ", XF86AudioLowerVolume, exec, $HOME/.local/bin/osd vol-down"
+        ", XF86MonBrightnessUp, exec, $HOME/.local/bin/osd bright-up"
+        ", XF86MonBrightnessDown, exec, $HOME/.local/bin/osd bright-down"
       ];
 
       bindl = [
-        ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+        ", XF86AudioMute, exec, $HOME/.local/bin/osd vol-mute"
         ", XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
         ", switch:on:Lid Switch, exec, systemctl suspend"
       ];
@@ -533,6 +537,41 @@ in
           systemctl reboot;;
         " Shutdown")
           systemctl poweroff;;
+      esac
+    '';
+  };
+
+  # Volume/brightness OSD: change the level, then show a mako popup with a
+  # progress bar (the int:value hint). x-canonical-private-synchronous replaces
+  # the previous popup instead of stacking. Reliable without swayosd.
+  home.file.".local/bin/osd" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      sink="@DEFAULT_AUDIO_SINK@"
+      sync="string:x-canonical-private-synchronous:osd"
+
+      case "$1" in
+        vol-up)      wpctl set-volume -l 1.0 "$sink" 5%+ ;;
+        vol-down)    wpctl set-volume "$sink" 5%- ;;
+        vol-mute)    wpctl set-mute "$sink" toggle ;;
+        bright-up)   brightnessctl set 5%+ ;;
+        bright-down) brightnessctl set 5%- ;;
+      esac
+
+      case "$1" in
+        bright-*)
+          b=$(brightnessctl -m | cut -d, -f4 | tr -d %)
+          notify-send -u low -h "$sync" -h "int:value:''${b}" "Brightness  ''${b}%"
+          ;;
+        *)
+          if wpctl get-volume "$sink" | grep -q MUTED; then
+            notify-send -u low -h "$sync" -h "int:value:0" "Muted"
+          else
+            v=$(wpctl get-volume "$sink" | awk '{print int($2*100)}')
+            notify-send -u low -h "$sync" -h "int:value:''${v}" "Volume  ''${v}%"
+          fi
+          ;;
       esac
     '';
   };
