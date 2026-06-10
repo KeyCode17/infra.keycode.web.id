@@ -55,8 +55,7 @@ in
         "mako"
         "systemctl --user start hypridle.service"
         "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
-        "wl-paste --type text --watch cliphist store"
-        "wl-paste --type image --watch cliphist store"
+        "systemctl --user restart cliphist-text.service cliphist-image.service"
       ];
 
       general = {
@@ -418,6 +417,33 @@ in
       ExecStartPost = "${pkgs.bash}/bin/bash -c 'sleep 1; ${pkgs.eww}/bin/eww open bar'";
       Restart = "on-failure";
       RestartSec = 2;
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
+
+  # Clipboard history watchers (absolute paths so they work regardless of PATH).
+  systemd.user.services.cliphist-text = {
+    Unit = {
+      Description = "cliphist text watcher";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.wl-clipboard}/bin/wl-paste --type text --watch ${pkgs.cliphist}/bin/cliphist store";
+      Restart = "on-failure";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
+
+  systemd.user.services.cliphist-image = {
+    Unit = {
+      Description = "cliphist image watcher";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.wl-clipboard}/bin/wl-paste --type image --watch ${pkgs.cliphist}/bin/cliphist store";
+      Restart = "on-failure";
     };
     Install.WantedBy = [ "graphical-session.target" ];
   };
