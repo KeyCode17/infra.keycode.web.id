@@ -4,7 +4,8 @@
     c = "clear";
     v = "nvim";
     t = "~/.local/bin/tmux-startup";
-    cl = "claude";
+    cl = "claude --dangerously-skip-permissions";
+    clc = "claude --dangerously-skip-permissions --chrome";
     build-system = "sudo nix run nix-darwin -- switch --flake ~/.config/nix";
 
     ss = "ls -t ~/Desktop/*.png 2>/dev/null | head -1";

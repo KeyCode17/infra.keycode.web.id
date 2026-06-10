@@ -37,6 +37,11 @@
 (defpoll DISK    :interval "60s" :initial "0"
   "df -P / | awk 'NR==2{print int($5)}'")
 
+;; detailed breakdowns shown on hover (tooltip)
+(defpoll CPU_DETAIL  :interval "5s"  :initial "..." "sysinfo cpu")
+(defpoll RAM_DETAIL  :interval "5s"  :initial "..." "sysinfo ram")
+(defpoll DISK_DETAIL :interval "30s" :initial "..." "sysinfo disk")
+
 (defpoll SSID    :interval "5s" :initial ""
   "nmcli -t -f active,ssid dev wifi 2>/dev/null | awk -F: '/^yes/{print $2; exit}' | cut -c1-12")
 
@@ -75,6 +80,14 @@
     (label :class "metric-ico" :text icon :halign "center" :hexpand true)
     (label :class "metric-val" :text value :halign "center" :hexpand true)))
 
+;; clickable metric with a hover tooltip (used for cpu/ram/disk)
+(defwidget metric-btn [icon value cls tooltip onclick]
+  (eventbox :class "metric ${cls}" :tooltip tooltip :onclick onclick
+            :cursor "pointer" :hexpand true
+    (box :orientation "v" :space-evenly false :spacing 0
+      (label :class "metric-ico" :text icon :halign "center" :hexpand true)
+      (label :class "metric-val" :text value :halign "center" :hexpand true))))
+
 (defwidget tray []
   (box :class "tray" :orientation "v" :space-evenly false :spacing 12
        :valign "end" :hexpand true
@@ -82,9 +95,9 @@
             :value {MUTED == "true" ? "—" : "${VOL}"}
             :cls "m-vol")
     (metric :icon "" :value BRIGHT :cls "m-bright")
-    (metric :icon "" :value CPU  :cls "m-cpu")
-    (metric :icon "" :value RAM  :cls "m-ram")
-    (metric :icon "" :value DISK :cls "m-disk")
+    (metric-btn :icon "" :value CPU :cls "m-cpu" :tooltip CPU_DETAIL :onclick "kitty --class sysmon -e btm")
+    (metric-btn :icon "" :value RAM :cls "m-ram" :tooltip RAM_DETAIL :onclick "kitty --class sysmon -e btm")
+    (metric-btn :icon "" :value DISK :cls "m-disk" :tooltip DISK_DETAIL :onclick "kitty --class sysmon -e ncdu /")
     (metric :icon {AC == "1" ? "" : ""}
             :value BATT
             :cls {AC == "1" ? "m-batt batt-charge" : (BATT <= 15 ? "m-batt batt-low" : "m-batt")})

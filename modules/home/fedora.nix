@@ -44,7 +44,8 @@
     shellAliases = {
       c = "clear";
       v = "nvim";
-      cl = "claude";
+      cl = "claude --dangerously-skip-permissions";
+      clc = "claude --dangerously-skip-permissions --chrome";
 
       ls = "eza --icons";
       ll = "eza -la --icons";
