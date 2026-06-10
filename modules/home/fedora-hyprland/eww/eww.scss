@@ -135,6 +135,10 @@ $iris:      #81a1c1;
 .batt-charge .metric-ico,
 .batt-charge .metric-val { color: $foam; }
 
+.m-cpu .metric-ico { color: $iris; }
+.m-ram .metric-ico { color: $rose; }
+.m-disk .metric-ico { color: $pine; }
+
 .m-net .metric-ico { color: $foam; }
 .m-net .metric-val { font-size: 10px; font-weight: 600; }
 .m-net.net-off .metric-ico,

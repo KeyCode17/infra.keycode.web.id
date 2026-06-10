@@ -29,6 +29,14 @@
 (defpoll BRIGHT  :interval "2s" :initial "0"
   "brightnessctl -m 2>/dev/null | cut -d, -f4 | tr -d %")
 
+;; system stats (percent used)
+(defpoll CPU     :interval "3s"  :initial "0"
+  "top -bn2 -d 0.2 | awk '/%Cpu/{v=int($2+$4)} END{print v}'")
+(defpoll RAM     :interval "5s"  :initial "0"
+  "free | awk '/^Mem/{print int($3/$2*100)}'")
+(defpoll DISK    :interval "60s" :initial "0"
+  "df -P / | awk 'NR==2{print int($5)}'")
+
 (defpoll SSID    :interval "5s" :initial ""
   "nmcli -t -f active,ssid dev wifi 2>/dev/null | awk -F: '/^yes/{print $2; exit}' | cut -c1-12")
 
@@ -68,12 +76,15 @@
     (label :class "metric-val" :text value :halign "center" :hexpand true)))
 
 (defwidget tray []
-  (box :class "tray" :orientation "v" :space-evenly false :spacing 16
+  (box :class "tray" :orientation "v" :space-evenly false :spacing 12
        :valign "end" :hexpand true
     (metric :icon {MUTED == "true" ? "" : ""}
             :value {MUTED == "true" ? "—" : "${VOL}"}
             :cls "m-vol")
     (metric :icon "" :value BRIGHT :cls "m-bright")
+    (metric :icon "" :value CPU  :cls "m-cpu")
+    (metric :icon "" :value RAM  :cls "m-ram")
+    (metric :icon "" :value DISK :cls "m-disk")
     (metric :icon {AC == "1" ? "" : ""}
             :value BATT
             :cls {AC == "1" ? "m-batt batt-charge" : (BATT <= 15 ? "m-batt batt-low" : "m-batt")})
