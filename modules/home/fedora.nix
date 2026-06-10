@@ -107,7 +107,7 @@
     baseIndex = 1;
     keyMode = "vi";
     mouse = true;
-    prefix = "C-a";
+    prefix = "C-Space";
 
     plugins = with pkgs.tmuxPlugins; [
       sensible
