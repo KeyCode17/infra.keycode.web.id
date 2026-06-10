@@ -148,6 +148,10 @@ in
         "__GLX_VENDOR_LIBRARY_NAME,nvidia"
         "LIBVA_DRIVER_NAME,nvidia"
         "NVD_BACKEND,direct"
+
+        # GDM launches Hyprland with a bare PATH (/usr/bin only); prepend the
+        # nix profile so keybinds/exec-once can find rofi, cliphist, wofi, btm…
+        "PATH,/home/keycode/.nix-profile/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/bin:/sbin"
       ];
 
       debug = {
@@ -632,6 +636,7 @@ in
     executable = true;
     text = ''
       #!/usr/bin/env bash
+      export PATH="$HOME/.nix-profile/bin:$PATH"
       PINS="''${XDG_DATA_HOME:-$HOME/.local/share}/cliphist-pins"
       mkdir -p "$(dirname "$PINS")"; touch "$PINS"
       star="★ "
