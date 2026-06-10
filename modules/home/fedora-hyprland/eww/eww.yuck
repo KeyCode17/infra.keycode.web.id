@@ -91,12 +91,14 @@
     (metric :icon "" :value CPU :cls "m-cpu")
     (metric :icon "" :value RAM :cls "m-ram")
     (metric :icon "" :value DISK :cls "m-disk")
-    (metric :icon {AC == "1" ? "" : ""}
-            :value BATT
-            :cls {AC == "1" ? "m-batt batt-charge" : (BATT <= 15 ? "m-batt batt-low" : "m-batt")})
-    (metric :icon {SSID != "" ? "" : ""}
-            :value {SSID != "" ? SSID : "off"}
-            :cls {SSID != "" ? "m-net" : "m-net net-off"})
+    (eventbox :class "batt-evt" :cursor "pointer" :onclick "gnome-control-center power"
+      (metric :icon {AC == "1" ? "" : ""}
+              :value BATT
+              :cls {AC == "1" ? "m-batt batt-charge" : (BATT <= 15 ? "m-batt batt-low" : "m-batt")}))
+    (eventbox :class "net-evt" :cursor "pointer" :onclick "nm-connection-editor"
+      (metric :icon {SSID != "" ? "" : ""}
+              :value {SSID != "" ? SSID : "off"}
+              :cls {SSID != "" ? "m-net" : "m-net net-off"}))
     (button :class "power" :onclick "$HOME/.local/bin/wofi-power &"
             :halign "center"
       (label :class "power-icon" :halign "center" :valign "center" :text ""))))
