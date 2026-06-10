@@ -83,7 +83,7 @@
   (box :class "tray" :orientation "v" :space-evenly false :spacing 12
        :valign "end" :hexpand true
     (eventbox :class "vol-evt" :cursor "pointer"
-              :onclick "pavucontrol"
+              :onclick "hyprctl dispatch exec pavucontrol"
               :onrightclick "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
               :onscroll "[ {} = up ] && wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+ || wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
       (metric :icon {MUTED == "true" ? "" : ""}
@@ -93,11 +93,11 @@
     (metric :icon "" :value CPU :cls "m-cpu")
     (metric :icon "" :value RAM :cls "m-ram")
     (metric :icon "" :value DISK :cls "m-disk")
-    (eventbox :class "batt-evt" :cursor "pointer" :onclick "gnome-control-center power"
+    (eventbox :class "batt-evt" :cursor "pointer" :onclick "hyprctl dispatch exec gnome-control-center power"
       (metric :icon {AC == "1" ? "" : ""}
               :value BATT
               :cls {AC == "1" ? "m-batt batt-charge" : (BATT <= 15 ? "m-batt batt-low" : "m-batt")}))
-    (eventbox :class "net-evt" :cursor "pointer" :onclick "nm-connection-editor"
+    (eventbox :class "net-evt" :cursor "pointer" :onclick "hyprctl dispatch exec nm-connection-editor"
       (metric :icon {NETTYPE == "wifi" ? "" : (NETTYPE == "ethernet" ? "" : "")}
               :value {NETTYPE == "wifi" ? SSID : (NETTYPE == "ethernet" ? "LAN" : "off")}
               :cls {NETTYPE == "none" ? "m-net net-off" : "m-net"}))
