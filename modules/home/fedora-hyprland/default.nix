@@ -865,13 +865,13 @@ $I_BOTH  System + Mic" | pick "Record audio" "Audio source")
     enable = true;
 
     theme = {
-      name = "rose-pine";
-      package = pkgs.rose-pine-gtk-theme;
+      name = "Nordic";
+      package = pkgs.nordic;
     };
 
     iconTheme = {
-      name = "rose-pine";
-      package = pkgs.rose-pine-icon-theme;
+      name = "Nordzy";
+      package = pkgs.nordzy-icon-theme;
     };
 
     cursorTheme = {
@@ -895,6 +895,13 @@ $I_BOTH  System + Mic" | pick "Record audio" "Audio source")
       gtk-decoration-layout = "appmenu:none";
     };
   };
+
+  # GTK4 / libadwaita apps (nautilus, etc.) ignore the gtk-theme setting, so
+  # link the Nordic theme's GTK4 CSS into ~/.config/gtk-4.0 to actually skin them.
+  xdg.configFile."gtk-4.0/gtk.css".source =
+    "${pkgs.nordic}/share/themes/Nordic/gtk-4.0/gtk.css";
+  xdg.configFile."gtk-4.0/gtk-dark.css".source =
+    "${pkgs.nordic}/share/themes/Nordic/gtk-4.0/gtk-dark.css";
 
   qt = {
     enable = true;
@@ -920,8 +927,8 @@ $I_BOTH  System + Mic" | pick "Record audio" "Audio source")
   dconf.settings = {
     "org/gnome/desktop/interface" = {
       color-scheme = "prefer-dark";
-      gtk-theme = "rose-pine";
-      icon-theme = "rose-pine";
+      gtk-theme = "Nordic";
+      icon-theme = "Nordzy";
       cursor-theme = "Bibata-Modern-Classic";
       font-name = "CaskaydiaCove Nerd Font 11";
       document-font-name = "CaskaydiaCove Nerd Font 11";
