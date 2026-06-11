@@ -198,9 +198,22 @@ in
         "$mod SHIFT, E, exit"
         "$mod, V, togglefloating"
         "$mod, F, fullscreen"
-        "$mod, J, layoutmsg, togglesplit"
+        "$mod SHIFT, F, fullscreen, 1"
+        "$mod, T, layoutmsg, togglesplit"
         "$mod SHIFT, B, exec, eww open --toggle bar"
         "$mod SHIFT, H, exec, systemctl hibernate"
+
+        # move the focused window
+        "$mod SHIFT, left, movewindow, l"
+        "$mod SHIFT, right, movewindow, r"
+        "$mod SHIFT, up, movewindow, u"
+        "$mod SHIFT, down, movewindow, d"
+
+        # resize the focused window (hold and tap)
+        "$mod CONTROL, left, resizeactive, -60 0"
+        "$mod CONTROL, right, resizeactive, 60 0"
+        "$mod CONTROL, up, resizeactive, 0 -60"
+        "$mod CONTROL, down, resizeactive, 0 60"
 
         "$mod, left, movefocus, l"
         "$mod, right, movefocus, r"
