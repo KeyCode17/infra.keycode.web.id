@@ -141,4 +141,4 @@
                       :y "0px"
                       :anchor "left center")
   (box :class "cal-box"
-    (cal :class "cal")))
+    (calendar :class "cal")))
