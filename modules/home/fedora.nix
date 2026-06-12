@@ -192,6 +192,10 @@
     sessionVariables = {
       EDITOR = "nvim";
       GOPATH = "$HOME/go";
+      # gnome-keyring's ssh agent (gcr-ssh-agent.socket, enabled manually):
+      # the key passphrase is stored in the login keyring — PAM unlocks it
+      # with the login password at boot, so ssh never prompts again.
+      SSH_AUTH_SOCK = "$XDG_RUNTIME_DIR/gcr/ssh";
     };
 
     sessionPath = [

@@ -3,8 +3,9 @@
 ;; ╰───────────────────────────────────────────────╯
 
 ;; ── data sources ────────────────────────────────
-(defpoll HOUR    :interval "5s"  :initial "00" "date +%H")
+(defpoll HOUR    :interval "5s"  :initial "12" "date +%I")
 (defpoll MINUTE  :interval "5s"  :initial "00" "date +%M")
+(defpoll PERIOD  :interval "5s"  :initial "AM" "date +%p")
 (defpoll DAY     :interval "30m" :initial "01" "date +%d")
 (defpoll MONTH   :interval "30m" :initial "Jan" "date +%b")
 
@@ -68,9 +69,12 @@
        :valign "center" :halign "center"
     (label :class "clk-h" :text HOUR)
     (label :class "clk-m" :text MINUTE)
+    (label :class "clk-p" :text PERIOD)
     (box :class "clk-dot")
-    (label :class "clk-d"  :text DAY)
-    (label :class "clk-mo" :text MONTH)))
+    (eventbox :class "clk-date" :cursor "pointer" :onclick "eww open --toggle calendar"
+      (box :orientation "v" :space-evenly false :spacing 0 :halign "center"
+        (label :class "clk-d"  :text DAY)
+        (label :class "clk-mo" :text MONTH)))))
 
 (defwidget metric [icon value cls]
   (box :class "metric ${cls}" :orientation "v" :space-evenly false :spacing 0
@@ -128,3 +132,13 @@
                       :height "100%"
                       :anchor "left center")
   (bar))
+
+;; floating calendar popup (toggled by clicking the date)
+(defwindow calendar
+  :monitor 0
+  :stacking "overlay"
+  :geometry (geometry :x "108px"
+                      :y "0px"
+                      :anchor "left center")
+  (box :class "cal-box"
+    (cal :class "cal")))
