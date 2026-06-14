@@ -193,6 +193,7 @@ in
         "$mod, D, exec, $menu"
         "$mod, E, exec, $fileManager"
         "$mod, B, exec, $browser"
+        "$mod, N, exec, $HOME/.local/bin/net-menu"
 
         "$mod SHIFT, Q, killactive"
         "$mod SHIFT, E, exit"
