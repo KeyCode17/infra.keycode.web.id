@@ -861,6 +861,74 @@ $I_BOTH  System + Mic" | pick "Record audio" "Audio source")
     element-text { text-color: inherit; vertical-align: 0.5; }
   '';
 
+  # Simple network menu (rofi): wifi list + ethernet, connect/disconnect,
+  # password prompt, wifi on/off toggle. Opened by clicking the bar's net widget.
+  home.file.".local/bin/net-menu" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      export PATH="$HOME/.nix-profile/bin:$PATH"
+      RASI="$HOME/.config/rofi/clip.rasi"
+      I_WIFI=$(printf ''); I_LOCK=$(printf ''); I_CHK=$(printf '')
+      I_PWR=$(printf '');  I_DIS=$(printf ''); I_LAN=$(printf '')
+      I_REF=$(printf '')
+
+      KIND=(); DATA=(); DISP=()
+      add() { KIND+=("$1"); DATA+=("$2"); DISP+=("$3"); }
+
+      wifi=$(nmcli radio wifi 2>/dev/null)
+      if [ "$wifi" = enabled ]; then
+        add toggle off "$I_PWR  Turn Wi-Fi Off"
+        add rescan "" "$I_REF  Rescan networks"
+        nmcli dev wifi rescan >/dev/null 2>&1
+        while IFS=: read -r inuse ssid signal sec; do
+          [ -z "$ssid" ] && continue
+          mark=""; [ "$inuse" = "*" ] && mark="$I_CHK "
+          lk="";   [ -n "$sec" ] && lk="  $I_LOCK"
+          add wifi "$ssid" "$I_WIFI  $mark$ssid  ($signal%)$lk"
+        done < <(nmcli -t -f IN-USE,SSID,SIGNAL,SECURITY dev wifi list 2>/dev/null \
+                 | awk -F: 'NF>=2 && $2!="" && !seen[$2]++' | sort -t: -k3 -rn)
+      else
+        add toggle on "$I_PWR  Turn Wi-Fi On"
+      fi
+
+      awifi=$(nmcli -t -f NAME,TYPE con show --active 2>/dev/null | awk -F: '$2 ~ /wireless/{print $1; exit}')
+      [ -n "$awifi" ] && add disconnect "$awifi" "$I_DIS  Disconnect $awifi"
+
+      eth=$(nmcli -t -f DEVICE,TYPE,STATE device 2>/dev/null | awk -F: '$2=="ethernet"{print $3; exit}')
+      [ -n "$eth" ] && add eth "" "$I_LAN  Ethernet: $eth"
+
+      idx=$(printf '%s\n' "''${DISP[@]}" | rofi -dmenu -i -format i -p "Network" \
+            -theme "$RASI" -mesg "Click a network to connect")
+      [ -z "$idx" ] && exit 0
+      k="''${KIND[$idx]}"; d="''${DATA[$idx]}"
+
+      note() { notify-send -u low "Network" "$1"; }
+
+      case "$k" in
+        toggle) nmcli radio wifi "$d"; sleep 1; exec "$0" ;;
+        rescan) nmcli dev wifi rescan >/dev/null 2>&1; sleep 2; exec "$0" ;;
+        disconnect) nmcli con down id "$d" && note "Disconnected $d" ;;
+        eth) nm-connection-editor ;;
+        wifi)
+          if nmcli -t -f NAME con show 2>/dev/null | grep -qxF "$d"; then
+            nmcli con up id "$d" && note "Connected to $d" || note "Failed to connect $d"
+          else
+            sec=$(nmcli -t -f SSID,SECURITY dev wifi list 2>/dev/null | awk -F: -v s="$d" '$1==s{print $2; exit}')
+            if [ -n "$sec" ]; then
+              pw=$(rofi -dmenu -password -p "Password" -theme "$RASI" \
+                   -mesg "Wi-Fi password for $d" < /dev/null)
+              [ -z "$pw" ] && exit 0
+              nmcli dev wifi connect "$d" password "$pw" \
+                && note "Connected to $d" || note "Could not connect (wrong password?)"
+            else
+              nmcli dev wifi connect "$d" && note "Connected to $d" || note "Failed to connect $d"
+            fi
+          fi ;;
+      esac
+    '';
+  };
+
   gtk = {
     enable = true;
 

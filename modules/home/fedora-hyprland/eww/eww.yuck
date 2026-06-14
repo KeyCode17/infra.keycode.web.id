@@ -101,7 +101,7 @@
       (metric :icon {AC == "1" ? "" : ""}
               :value BATT
               :cls {AC == "1" ? "m-batt batt-charge" : (BATT <= 15 ? "m-batt batt-low" : "m-batt")}))
-    (eventbox :class "net-evt" :cursor "pointer" :onclick "hyprctl dispatch exec nm-connection-editor"
+    (eventbox :class "net-evt" :cursor "pointer" :onclick "hyprctl dispatch exec $HOME/.local/bin/net-menu"
       (metric :icon {NETTYPE == "wifi" ? "" : (NETTYPE == "ethernet" ? "" : "")}
               :value {NETTYPE == "wifi" ? SSID : (NETTYPE == "ethernet" ? "LAN" : "off")}
               :cls {NETTYPE == "none" ? "m-net net-off" : "m-net"}))
