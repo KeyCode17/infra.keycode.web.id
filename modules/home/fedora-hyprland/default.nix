@@ -202,7 +202,6 @@ in
         "$mod SHIFT, F, fullscreen, 1"
         "$mod, T, layoutmsg, togglesplit"
         "$mod SHIFT, B, exec, eww open --toggle bar"
-        "$mod SHIFT, H, exec, systemctl hibernate"
 
         # move the focused window
         "$mod SHIFT, left, movewindow, l"
