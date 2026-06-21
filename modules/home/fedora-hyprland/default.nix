@@ -720,8 +720,19 @@ in
             else args+=(--audio); fi ;;
         esac
         f="$viddir/rec-$(date +%Y%m%d-%H%M%S).mp4"
-        notify-send "Recording started" "Press Print again to stop"
-        setsid -f wf-recorder "''${args[@]}" -f "$f" >/dev/null 2>&1
+        log="$HOME/.cache/wf-recorder.log"
+        setsid -f wf-recorder "''${args[@]}" -f "$f" >"$log" 2>&1
+        sleep 0.7
+        if pgrep -x wf-recorder >/dev/null; then
+          notify-send "Recording started" "Press Print again to stop"
+        else
+          # wf-recorder died on launch — surface the real reason and roll back
+          notify-send -u critical -t 6000 "Recording failed" "$(tail -n2 "$log")"
+          if [ -f "$viddir/.rec-modules" ]; then
+            for m in $(cat "$viddir/.rec-modules"); do pactl unload-module "$m" 2>/dev/null; done
+            rm -f "$viddir/.rec-modules"
+          fi
+        fi
       else
         f="$shotdir/shot-$(date +%Y%m%d-%H%M%S).png"
         if [ -n "$geo" ]; then grim -g "$geo" "$f"; else grim "$f"; fi
