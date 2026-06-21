@@ -660,9 +660,10 @@ in
       fi
 
       rm -f /tmp/.cap-done /tmp/.cap-cancel
-      cur=$(eww get cap_cursor 2>/dev/null)
-      hc="--hide-cursor"; [ "$cur" = "on" ] && hc=""
-      wayfreeze $hc >/dev/null 2>&1 &
+      # Always keep the cursor visible: the user needs to see it to aim at the
+      # panel buttons and to drag a slurp selection. grim never captures the
+      # cursor anyway, so hiding it only made the panel unusable.
+      wayfreeze >/dev/null 2>&1 &
       WF=$!
       trap 'kill "$WF" 2>/dev/null' EXIT
       sleep 0.18
