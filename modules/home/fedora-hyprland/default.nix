@@ -670,6 +670,8 @@ in
       # hold the freeze until capture-do signals done/cancel (60s safety cap)
       n=0
       while [ ! -f /tmp/.cap-done ] && [ ! -f /tmp/.cap-cancel ] && [ $n -lt 600 ]; do
+        # re-freeze if wayfreeze died (e.g. a stray click on an exposed area)
+        kill -0 "$WF" 2>/dev/null || { wayfreeze $hc >/dev/null 2>&1 & WF=$!; }
         sleep 0.1; n=$((n+1))
       done
       sleep 0.05
