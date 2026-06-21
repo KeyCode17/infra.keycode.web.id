@@ -693,7 +693,9 @@ in
 
       geo=""
       case "$area" in
-        selection) geo=$(slurp 2>/dev/null); [ -z "$geo" ] && { touch /tmp/.cap-cancel; exit 0; } ;;
+        selection)
+          geo=$(slurp 2>/dev/null)
+          [ -z "$geo" ] && { notify-send -t 1500 "Capture cancelled" "No region selected"; touch /tmp/.cap-cancel; exit 0; } ;;
         window)    geo=$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"') ;;
         screen)    geo="" ;;
       esac
@@ -722,8 +724,13 @@ in
       else
         f="$shotdir/shot-$(date +%Y%m%d-%H%M%S).png"
         if [ -n "$geo" ]; then grim -g "$geo" "$f"; else grim "$f"; fi
-        touch /tmp/.cap-done
-        [ -f "$f" ] && { wl-copy < "$f"; notify-send -i "$f" "Screenshot saved" "$f"; }
+        touch /tmp/.cap-done   # release the freeze
+        if [ -s "$f" ]; then
+          wl-copy --type image/png < "$f"
+          notify-send -t 2500 -i "$f" "Screenshot saved" "Copied to clipboard — $f"
+        else
+          notify-send -u critical -t 3000 "Screenshot failed" "grim produced no image"
+        fi
       fi
     '';
   };

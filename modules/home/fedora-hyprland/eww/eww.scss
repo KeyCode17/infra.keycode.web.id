@@ -214,6 +214,11 @@ $iris:      #81a1c1;
 }
 
 // ── screenshot / record control (GNOME-style) ──────────────
+.cap-overlay {
+  // fullscreen; subtle dim over the frozen screen (GNOME-style). The surface
+  // owns the whole screen's input region so no click reaches wayfreeze.
+  background-color: rgba(46, 52, 64, 0.25);
+}
 .cap-panel {
   background-color: rgba(46, 52, 64, 0.97);
   border: 2px solid rgba(129, 161, 193, 0.5);

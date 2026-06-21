@@ -195,13 +195,15 @@
               :onclick "eww update cap_cursor=${cap_cursor == 'on' ? 'off' : 'on'}"
         (label :class "cap-ico" :text "")))))
 
-;; Fixed-size window: wayfreeze unfreezes on any click that reaches it.
-;; A constant-size eww surface absorbs every click inside its rectangle, so
-;; toggling the audio row (photo<->video) can reflow the panel without ever
-;; exposing wayfreeze to a stray click. Keep it big enough for the video layout.
+;; Fullscreen overlay: wayfreeze unfreezes on ANY click that reaches it (no flag
+;; to disable). A fullscreen eww layer surface owns the whole screen's input
+;; region, so every click — on a button, on the panel reflow, or on empty space —
+;; is absorbed by eww and never reaches wayfreeze. Clicking the empty area cancels
+;; (GNOME-style click-outside-to-dismiss).
 (defwindow capture
   :monitor 0
   :stacking "overlay"
-  :geometry (geometry :anchor "center" :x "0px" :y "0px" :width "520px" :height "380px")
-  (box :halign "center" :valign "center"
-    (capture-panel)))
+  :geometry (geometry :anchor "center" :x "0px" :y "0px" :width "100%" :height "100%")
+  (eventbox :class "cap-overlay" :onclick "$HOME/.local/bin/capture-do cancel"
+    (box :halign "center" :valign "center"
+      (capture-panel))))
