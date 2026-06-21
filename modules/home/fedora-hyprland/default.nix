@@ -658,9 +658,37 @@ in
 
       pick() { rofi -dmenu -i -p "$1" -theme "$RASI" -mesg "$2"; }
 
-      shot() {
+      CURFILE="$HOME/.cache/screenshot-cursor"
+      [ -f "$CURFILE" ] || echo off > "$CURFILE"
+      cursor=$(cat "$CURFILE")
+
+      # Freeze the screen (wayfreeze) and let slurp pick a region on the frozen
+      # image; cursor is baked into the freeze per the toggle. Sets REGGEO.
+      grab_region() {
+        local hc=""; [ "$cursor" = off ] && hc="--hide-cursor"
+        wayfreeze $hc >/dev/null 2>&1 &
+        WF=$!
+        sleep 0.2
+        REGGEO=$(slurp 2>/dev/null)
+      }
+      unfreeze() { kill "$WF" 2>/dev/null; }
+
+      save_shot() { wl-copy < "$1"; notify-send -i "$1" "Screenshot saved" "$1"; }
+
+      shot_region() {
+        grab_region
+        [ -z "$REGGEO" ] && { unfreeze; exit 0; }
         f="$shotdir/shot-$(date +%Y%m%d-%H%M%S).png"
-        if grim "$@" "$f"; then wl-copy < "$f"; notify-send -i "$f" "Screenshot saved" "$f"; fi
+        sleep 0.05; grim -g "$REGGEO" "$f"
+        unfreeze
+        [ -f "$f" ] && save_shot "$f"
+      }
+
+      shot_static() {  # $1 = "" (full) or geo; cursor via grim -c
+        local cflag=""; [ "$cursor" = on ] && cflag="-c"
+        f="$shotdir/shot-$(date +%Y%m%d-%H%M%S).png"
+        if [ -n "$1" ]; then grim $cflag -g "$1" "$f"; else grim $cflag "$f"; fi
+        [ -f "$f" ] && save_shot "$f"
       }
 
       stop_rec() {
@@ -672,9 +700,20 @@ in
         notify-send "Recording stopped" "Saved in $viddir"
       }
 
-      start_rec() { # $1 = region|screen   $2 = none|system|mic|both
+      ask_audio() {
+        a=$(printf '%s' "$I_MUTE  No audio
+$I_SYS  System
+$I_MIC  Mic
+$I_BOTH  System + Mic" | pick "Audio" "Pick audio source")
+        case "$a" in
+          *"No audio") echo none ;; *System) echo system ;;
+          *Mic) echo mic ;; *"System + Mic") echo both ;; *) echo "" ;;
+        esac
+      }
+
+      start_rec() {  # $1 = geo ("" full)   $2 = audio
         args=(); SINK=$(pactl get-default-sink 2>/dev/null); SRC=$(pactl get-default-source 2>/dev/null)
-        if [ "$1" = region ]; then geo=$(slurp) || exit 0; args+=(-g "$geo"); fi
+        [ -n "$1" ] && args+=(-g "$1")
         case "$2" in
           system) [ -n "$SINK" ] && args+=(--audio="$SINK.monitor") || args+=(--audio) ;;
           mic)    [ -n "$SRC" ]  && args+=(--audio="$SRC")          || args+=(--audio) ;;
@@ -692,37 +731,36 @@ in
         setsid -f wf-recorder "''${args[@]}" -f "$f" >/dev/null 2>&1
       }
 
-      main="$I_REGION  Region
-$I_WIN  Window
-$I_SCREEN  Screen
-$I_REC  Record"
-      pgrep -x wf-recorder >/dev/null && main="$I_STOP  Stop recording
-$main"
+      CURUP=$(printf '%s' "$cursor" | tr a-z A-Z)
+      top=""
+      pgrep -x wf-recorder >/dev/null && top="$I_STOP  Stop recording
+"
+      main="''${top}[ Pointer: $CURUP ]
+$I_REGION  Shot region
+$I_WIN  Shot window
+$I_SCREEN  Shot screen
+$I_REC  Rec region
+$I_REC  Rec screen"
 
-      c=$(printf '%s' "$main" | pick "Capture" "Screenshot or screen record")
+      c=$(printf '%s' "$main" | pick "Capture" "Toggle pointer, then pick area")
       case "$c" in
-        *"Stop recording") stop_rec; exit 0 ;;
-        *Region) geo=$(slurp) || exit 0; sleep 0.1; shot -g "$geo"; exit 0 ;;
-        *Window) geo=$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"'); shot -g "$geo"; exit 0 ;;
-        *Screen) shot; exit 0 ;;
-        *Record) : ;;
+        *"Stop recording") stop_rec ;;
+        *"Pointer:"*)
+          [ "$cursor" = on ] && echo off > "$CURFILE" || echo on > "$CURFILE"
+          exec "$0" ;;
+        *"Shot region")  shot_region ;;
+        *"Shot window")  geo=$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"'); shot_static "$geo" ;;
+        *"Shot screen")  shot_static "" ;;
+        *"Rec region")
+          grab_region; unfreeze
+          [ -z "$REGGEO" ] && exit 0
+          aud=$(ask_audio); [ -z "$aud" ] && exit 0
+          start_rec "$REGGEO" "$aud" ;;
+        *"Rec screen")
+          aud=$(ask_audio); [ -z "$aud" ] && exit 0
+          start_rec "" "$aud" ;;
         *) exit 0 ;;
       esac
-
-      sc=$(printf '%s' "$I_REGION  Region
-$I_SCREEN  Whole screen
-$I_BACK  Back" | pick "Record area" "What to record")
-      case "$sc" in *Region) SCOPE=region ;; *"Whole screen") SCOPE=screen ;; *) exit 0 ;; esac
-
-      au=$(printf '%s' "$I_MUTE  No audio
-$I_SYS  System
-$I_MIC  Mic
-$I_BOTH  System + Mic" | pick "Record audio" "Audio source")
-      case "$au" in
-        *"No audio") AUD=none ;; *System) AUD=system ;;
-        *Mic) AUD=mic ;; *"System + Mic") AUD=both ;; *) exit 0 ;;
-      esac
-      start_rec "$SCOPE" "$AUD"
     '';
   };
 
@@ -1107,6 +1145,7 @@ $I_BOTH  System + Mic" | pick "Record audio" "Audio source")
     grim
     slurp
     wf-recorder
+    wayfreeze
     libnotify
     jq
     socat
