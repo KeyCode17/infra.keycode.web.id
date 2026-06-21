@@ -662,44 +662,25 @@ in
       [ -f "$CURFILE" ] || echo off > "$CURFILE"
       cursor=$(cat "$CURFILE")
 
-      # Internal modes run by `wayfreeze --after-freeze-cmd` (screen already
-      # frozen): select with slurp, capture it (or save the geometry), then end
-      # the freeze. slurp runs only after the freeze is up -> no race.
-      if [ "$1" = "__grab" ]; then
-        g=$(slurp 2>/dev/null); [ -n "$g" ] && grim -g "$g" "$2"
-        pkill -INT -x wayfreeze; exit 0
-      fi
-      if [ "$1" = "__grabgeo" ]; then
-        slurp 2>/dev/null > "$2"; pkill -INT -x wayfreeze; exit 0
-      fi
-
-      # Wait for the rofi toolbar to vanish before freezing, else the menu ends
-      # up inside the screenshot.
-      wait_ui_gone() { while pgrep -x rofi >/dev/null 2>&1; do sleep 0.03; done; sleep 0.12; }
+      # Freeze the WHOLE screen the instant Print is pressed. The menu and slurp
+      # then run on top of the frozen image; grim captures the freeze. The trap
+      # guarantees we always unfreeze, even on cancel/error.
+      hc=""; [ "$cursor" = off ] && hc="--hide-cursor"
+      wayfreeze $hc >/dev/null 2>&1 &
+      WF=$!
+      unfreeze() { [ -n "$WF" ] && kill "$WF" 2>/dev/null; WF=""; }
+      trap unfreeze EXIT
+      sleep 0.18
 
       save_shot() { wl-copy < "$1"; notify-send -i "$1" "Screenshot saved" "$1"; }
+      # menu sits on the frozen screen; make sure it's gone before grim
+      wait_ui_gone() { while pgrep -x rofi >/dev/null 2>&1; do sleep 0.03; done; sleep 0.08; }
 
-      shot_region() {
+      shot_save() {  # $1 = "" full | geo ; capture the frozen screen
         wait_ui_gone
         f="$shotdir/shot-$(date +%Y%m%d-%H%M%S).png"
-        local hc=""; [ "$cursor" = off ] && hc="--hide-cursor"
-        wayfreeze $hc --after-freeze-cmd "$0 __grab $f" >/dev/null 2>&1
-        [ -f "$f" ] && save_shot "$f"
-      }
-
-      freeze_geo() {  # sets REGGEO from a frozen slurp (for recording)
-        wait_ui_gone
-        local gf="$HOME/.cache/.shot-geo"; rm -f "$gf"
-        local hc=""; [ "$cursor" = off ] && hc="--hide-cursor"
-        wayfreeze $hc --after-freeze-cmd "$0 __grabgeo $gf" >/dev/null 2>&1
-        REGGEO=$(cat "$gf" 2>/dev/null)
-      }
-
-      shot_static() {  # $1 = "" (full) or geo; cursor via grim -c
-        wait_ui_gone
-        local cflag=""; [ "$cursor" = on ] && cflag="-c"
-        f="$shotdir/shot-$(date +%Y%m%d-%H%M%S).png"
-        if [ -n "$1" ]; then grim $cflag -g "$1" "$f"; else grim $cflag "$f"; fi
+        if [ -n "$1" ]; then grim -g "$1" "$f"; else grim "$f"; fi
+        unfreeze
         [ -f "$f" ] && save_shot "$f"
       }
 
@@ -754,21 +735,27 @@ $I_SCREEN  Shot screen
 $I_REC  Rec region
 $I_REC  Rec screen"
 
-      c=$(printf '%s' "$main" | pick "Capture" "Toggle pointer, then pick area")
+      c=$(printf '%s' "$main" | pick "Capture" "Screen frozen - pick what to capture")
       case "$c" in
-        *"Stop recording") stop_rec ;;
+        *"Stop recording") unfreeze; stop_rec ;;
         *"Pointer:"*)
           [ "$cursor" = on ] && echo off > "$CURFILE" || echo on > "$CURFILE"
-          exec "$0" ;;
-        *"Shot region")  shot_region ;;
-        *"Shot window")  geo=$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"'); shot_static "$geo" ;;
-        *"Shot screen")  shot_static "" ;;
+          unfreeze; trap - EXIT; exec "$0" ;;
+        *"Shot region")
+          wait_ui_gone; g=$(slurp 2>/dev/null)
+          [ -z "$g" ] && exit 0
+          shot_save "$g" ;;
+        *"Shot window")
+          g=$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"')
+          shot_save "$g" ;;
+        *"Shot screen") shot_save "" ;;
         *"Rec region")
-          freeze_geo
-          [ -z "$REGGEO" ] && exit 0
+          wait_ui_gone; g=$(slurp 2>/dev/null); unfreeze
+          [ -z "$g" ] && exit 0
           aud=$(ask_audio); [ -z "$aud" ] && exit 0
-          start_rec "$REGGEO" "$aud" ;;
+          start_rec "$g" "$aud" ;;
         *"Rec screen")
+          unfreeze
           aud=$(ask_audio); [ -z "$aud" ] && exit 0
           start_rec "" "$aud" ;;
         *) exit 0 ;;
