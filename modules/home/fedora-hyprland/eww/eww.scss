@@ -267,3 +267,35 @@ $iris:      #81a1c1;
   background-color: #ffffff;
   box-shadow: 0 0 18px rgba(129, 161, 193, 0.8);
 }
+
+// segmented photo/video toggle
+.cap-seg {
+  background-color: #3b4252;
+  border-radius: 24px;
+  padding: 4px;
+}
+.seg {
+  background-color: transparent;
+  border-radius: 20px;
+  min-width: 42px; min-height: 38px;
+  color: #d8dee9;
+  transition: all 150ms ease;
+}
+.seg:hover { background-color: #434c5e; }
+.seg.on { background-color: #81a1c1; color: #2e3440; }
+.seg-ico { font-family: "CaskaydiaCove Nerd Font"; font-size: 18px; }
+
+// audio selector (video only)
+.cap-audio { margin: 2px 0 6px 0; }
+.aud {
+  background-color: #3b4252;
+  border-radius: 12px;
+  padding: 10px 6px;
+  margin: 0 3px;
+  color: #d8dee9;
+  transition: all 150ms ease;
+}
+.aud:hover { background-color: #434c5e; }
+.aud.on { background-color: #81a1c1; color: #2e3440; }
+.aud-ico { font-family: "CaskaydiaCove Nerd Font"; font-size: 18px; }
+.aud-lbl { font-size: 10px; margin-top: 3px; }

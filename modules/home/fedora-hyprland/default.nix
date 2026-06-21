@@ -699,11 +699,25 @@ in
       esac
 
       if [ "$mode" = "video" ]; then
+        aud=$(eww get cap_audio 2>/dev/null)
         touch /tmp/.cap-done   # unfreeze; recording is live
         sleep 0.25
         args=(); [ -n "$geo" ] && args+=(-g "$geo")
+        SINK=$(pactl get-default-sink 2>/dev/null); SRC=$(pactl get-default-source 2>/dev/null)
+        case "$aud" in
+          system) [ -n "$SINK" ] && args+=(--audio="$SINK.monitor") || args+=(--audio) ;;
+          mic)    [ -n "$SRC" ]  && args+=(--audio="$SRC")          || args+=(--audio) ;;
+          both)
+            if [ -n "$SINK" ] && [ -n "$SRC" ]; then
+              n=$(pactl load-module module-null-sink sink_name=rec_mix sink_properties=device.description=rec_mix)
+              l1=$(pactl load-module module-loopback source="$SRC" sink=rec_mix latency_msec=20)
+              l2=$(pactl load-module module-loopback source="$SINK.monitor" sink=rec_mix latency_msec=20)
+              printf '%s %s %s\n' "$n" "$l1" "$l2" > "$viddir/.rec-modules"
+              args+=(--audio=rec_mix.monitor)
+            else args+=(--audio); fi ;;
+        esac
         f="$viddir/rec-$(date +%Y%m%d-%H%M%S).mp4"
-        notify-send "Recording started" "Press Print to stop"
+        notify-send "Recording started" "Press Print again to stop"
         setsid -f wf-recorder "''${args[@]}" -f "$f" >/dev/null 2>&1
       else
         f="$shotdir/shot-$(date +%Y%m%d-%H%M%S).png"

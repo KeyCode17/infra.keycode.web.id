@@ -144,10 +144,12 @@
     (calendar :class "cal")))
 
 
+
 ;; ── screenshot / record control (GNOME-style) ─────────────
 (defvar cap_area "selection")
 (defvar cap_mode "photo")
 (defvar cap_cursor "off")
+(defvar cap_audio "system")
 
 (defwidget cap-area-btn [id ico lbl]
   (button :class {cap_area == id ? "cap-area on" : "cap-area"}
@@ -156,8 +158,18 @@
       (label :class "cap-ico" :text ico)
       (label :class "cap-lbl" :text lbl))))
 
+(defwidget mode-btn [m ico]
+  (button :class {cap_mode == m ? "seg on" : "seg"} :onclick "eww update cap_mode=${m}"
+    (label :class "seg-ico" :text ico)))
+
+(defwidget aud-btn [a ico lbl]
+  (button :class {cap_audio == a ? "aud on" : "aud"} :onclick "eww update cap_audio=${a}"
+    (box :orientation "v" :space-evenly false :spacing 3 :halign "center"
+      (label :class "aud-ico" :text ico)
+      (label :class "aud-lbl" :text lbl))))
+
 (defwidget capture-panel []
-  (box :class "cap-panel" :orientation "v" :space-evenly false :spacing 16
+  (box :class "cap-panel" :orientation "v" :space-evenly false :spacing 14
     (box :halign "end"
       (button :class "cap-x" :onclick "$HOME/.local/bin/capture-do cancel"
         (label :text "")))
@@ -165,12 +177,20 @@
       (cap-area-btn :id "selection" :ico "" :lbl "Selection")
       (cap-area-btn :id "screen"    :ico "" :lbl "Screen")
       (cap-area-btn :id "window"    :ico ""  :lbl "Window"))
-    (box :class "cap-bottom" :space-evenly false :spacing 24 :halign "center" :valign "center"
-      (button :class "cap-mode" :tooltip "Screenshot / Record"
-              :onclick "eww update cap_mode=${cap_mode == 'photo' ? 'video' : 'photo'}"
-        (label :class "cap-ico" :text {cap_mode == "photo" ? "" : ""}))
+    (box :class "cap-audio" :visible {cap_mode == "video"}
+         :space-evenly true :spacing 8 :halign "fill"
+      (aud-btn :a "none"   :ico "" :lbl "No sound")
+      (aud-btn :a "system" :ico ""  :lbl "System")
+      (aud-btn :a "mic"    :ico ""  :lbl "Mic")
+      (aud-btn :a "both"   :ico "" :lbl "Both"))
+    (box :class "cap-bottom" :space-evenly false :halign "fill" :valign "center"
+      (box :class "cap-seg" :space-evenly true :halign "start" :spacing 0
+        (mode-btn :m "photo" :ico "")
+        (mode-btn :m "video" :ico ""))
+      (box :hexpand true)
       (button :class "cap-shutter" :onclick "$HOME/.local/bin/capture-do go"
         (label :class "cap-shutter-dot" :text ""))
+      (box :hexpand true)
       (button :class {cap_cursor == "on" ? "cap-cur on" : "cap-cur"} :tooltip "Include pointer"
               :onclick "eww update cap_cursor=${cap_cursor == 'on' ? 'off' : 'on'}"
         (label :class "cap-ico" :text "")))))
@@ -178,5 +198,5 @@
 (defwindow capture
   :monitor 0
   :stacking "overlay"
-  :geometry (geometry :anchor "center" :y "240px")
+  :geometry (geometry :anchor "center" :y "0px")
   (capture-panel))
