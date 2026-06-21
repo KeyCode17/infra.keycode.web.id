@@ -195,8 +195,13 @@
               :onclick "eww update cap_cursor=${cap_cursor == 'on' ? 'off' : 'on'}"
         (label :class "cap-ico" :text "")))))
 
+;; Fixed-size window: wayfreeze unfreezes on any click that reaches it.
+;; A constant-size eww surface absorbs every click inside its rectangle, so
+;; toggling the audio row (photo<->video) can reflow the panel without ever
+;; exposing wayfreeze to a stray click. Keep it big enough for the video layout.
 (defwindow capture
   :monitor 0
   :stacking "overlay"
-  :geometry (geometry :anchor "center" :y "0px")
-  (capture-panel))
+  :geometry (geometry :anchor "center" :x "0px" :y "0px" :width "520px" :height "380px")
+  (box :halign "center" :valign "center"
+    (capture-panel)))
