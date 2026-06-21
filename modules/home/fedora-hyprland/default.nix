@@ -662,29 +662,41 @@ in
       [ -f "$CURFILE" ] || echo off > "$CURFILE"
       cursor=$(cat "$CURFILE")
 
-      # Freeze the screen (wayfreeze) and let slurp pick a region on the frozen
-      # image; cursor is baked into the freeze per the toggle. Sets REGGEO.
-      grab_region() {
-        local hc=""; [ "$cursor" = off ] && hc="--hide-cursor"
-        wayfreeze $hc >/dev/null 2>&1 &
-        WF=$!
-        sleep 0.2
-        REGGEO=$(slurp 2>/dev/null)
-      }
-      unfreeze() { kill "$WF" 2>/dev/null; }
+      # Internal modes run by `wayfreeze --after-freeze-cmd` (screen already
+      # frozen): select with slurp, capture it (or save the geometry), then end
+      # the freeze. slurp runs only after the freeze is up -> no race.
+      if [ "$1" = "__grab" ]; then
+        g=$(slurp 2>/dev/null); [ -n "$g" ] && grim -g "$g" "$2"
+        pkill -INT -x wayfreeze; exit 0
+      fi
+      if [ "$1" = "__grabgeo" ]; then
+        slurp 2>/dev/null > "$2"; pkill -INT -x wayfreeze; exit 0
+      fi
+
+      # Wait for the rofi toolbar to vanish before freezing, else the menu ends
+      # up inside the screenshot.
+      wait_ui_gone() { while pgrep -x rofi >/dev/null 2>&1; do sleep 0.03; done; sleep 0.12; }
 
       save_shot() { wl-copy < "$1"; notify-send -i "$1" "Screenshot saved" "$1"; }
 
       shot_region() {
-        grab_region
-        [ -z "$REGGEO" ] && { unfreeze; exit 0; }
+        wait_ui_gone
         f="$shotdir/shot-$(date +%Y%m%d-%H%M%S).png"
-        sleep 0.05; grim -g "$REGGEO" "$f"
-        unfreeze
+        local hc=""; [ "$cursor" = off ] && hc="--hide-cursor"
+        wayfreeze $hc --after-freeze-cmd "$0 __grab $f" >/dev/null 2>&1
         [ -f "$f" ] && save_shot "$f"
       }
 
+      freeze_geo() {  # sets REGGEO from a frozen slurp (for recording)
+        wait_ui_gone
+        local gf="$HOME/.cache/.shot-geo"; rm -f "$gf"
+        local hc=""; [ "$cursor" = off ] && hc="--hide-cursor"
+        wayfreeze $hc --after-freeze-cmd "$0 __grabgeo $gf" >/dev/null 2>&1
+        REGGEO=$(cat "$gf" 2>/dev/null)
+      }
+
       shot_static() {  # $1 = "" (full) or geo; cursor via grim -c
+        wait_ui_gone
         local cflag=""; [ "$cursor" = on ] && cflag="-c"
         f="$shotdir/shot-$(date +%Y%m%d-%H%M%S).png"
         if [ -n "$1" ]; then grim $cflag -g "$1" "$f"; else grim $cflag "$f"; fi
@@ -752,7 +764,7 @@ $I_REC  Rec screen"
         *"Shot window")  geo=$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"'); shot_static "$geo" ;;
         *"Shot screen")  shot_static "" ;;
         *"Rec region")
-          grab_region; unfreeze
+          freeze_geo
           [ -z "$REGGEO" ] && exit 0
           aud=$(ask_audio); [ -z "$aud" ] && exit 0
           start_rec "$REGGEO" "$aud" ;;
