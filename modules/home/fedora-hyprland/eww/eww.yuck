@@ -171,7 +171,7 @@
 (defwidget capture-panel []
   (box :class "cap-panel" :orientation "v" :space-evenly false :spacing 14
     (box :halign "end"
-      (button :class "cap-x" :onclick "$HOME/.local/bin/capture-do cancel"
+      (button :class "cap-x" :onclick "setsid -f $HOME/.local/bin/capture-do cancel"
         (label :text "")))
     (box :class "cap-areas" :space-evenly true :spacing 12 :halign "fill"
       (cap-area-btn :id "selection" :ico "" :lbl "Selection")
@@ -188,7 +188,7 @@
         (mode-btn :m "photo" :ico "")
         (mode-btn :m "video" :ico ""))
       (box :hexpand true)
-      (button :class "cap-shutter" :onclick "$HOME/.local/bin/capture-do go"
+      (button :class "cap-shutter" :onclick "setsid -f $HOME/.local/bin/capture-do go"
         (label :class "cap-shutter-dot" :text ""))
       (box :hexpand true)
       (button :class {cap_cursor == "on" ? "cap-cur on" : "cap-cur"} :tooltip "Include pointer"
@@ -204,6 +204,6 @@
   :monitor 0
   :stacking "overlay"
   :geometry (geometry :anchor "center" :x "0px" :y "0px" :width "100%" :height "100%")
-  (eventbox :class "cap-overlay" :onclick "$HOME/.local/bin/capture-do cancel"
+  (eventbox :class "cap-overlay" :onclick "setsid -f $HOME/.local/bin/capture-do cancel"
     (box :halign "center" :valign "center"
       (capture-panel))))
