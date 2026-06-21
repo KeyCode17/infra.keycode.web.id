@@ -252,7 +252,7 @@ in
         "$mod, mouse_down, workspace, e+1"
         "$mod, mouse_up, workspace, e-1"
 
-        ", Print, exec, $HOME/.local/bin/screenshot"
+        ", Print, exec, $HOME/.local/bin/capture-ui"
         "SHIFT, Print, exec, grim -g \"$(slurp)\" - | wl-copy"
 
         "$mod, C, exec, cliphist list | wofi --dmenu | cliphist decode | wl-copy"
@@ -636,6 +636,81 @@ in
           fi
           ;;
       esac
+    '';
+  };
+
+  # GNOME-style capture control (Print): freezes the screen, shows the eww
+  # `capture` panel on top; capture-do performs the chosen action.
+  home.file.".local/bin/capture-ui" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      export PATH="$HOME/.nix-profile/bin:$PATH"
+      viddir="$HOME/Videos/Recordings"
+
+      # If a recording is running, Print stops it.
+      if pgrep -x wf-recorder >/dev/null; then
+        pkill -INT -x wf-recorder
+        if [ -f "$viddir/.rec-modules" ]; then
+          for m in $(cat "$viddir/.rec-modules"); do pactl unload-module "$m" 2>/dev/null; done
+          rm -f "$viddir/.rec-modules"
+        fi
+        notify-send "Recording stopped" "Saved in $viddir"
+        exit 0
+      fi
+
+      rm -f /tmp/.cap-done /tmp/.cap-cancel
+      cur=$(eww get cap_cursor 2>/dev/null)
+      hc="--hide-cursor"; [ "$cur" = "on" ] && hc=""
+      wayfreeze $hc >/dev/null 2>&1 &
+      WF=$!
+      trap 'kill "$WF" 2>/dev/null' EXIT
+      sleep 0.18
+      eww open capture
+      # hold the freeze until capture-do signals done/cancel (60s safety cap)
+      n=0
+      while [ ! -f /tmp/.cap-done ] && [ ! -f /tmp/.cap-cancel ] && [ $n -lt 600 ]; do
+        sleep 0.1; n=$((n+1))
+      done
+      sleep 0.05
+    '';
+  };
+
+  home.file.".local/bin/capture-do" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      export PATH="$HOME/.nix-profile/bin:$PATH"
+      shotdir="$HOME/Pictures/Screenshots"; mkdir -p "$shotdir"
+      viddir="$HOME/Videos/Recordings";     mkdir -p "$viddir"
+
+      eww close capture
+      if [ "$1" = "cancel" ]; then touch /tmp/.cap-cancel; exit 0; fi
+
+      area=$(eww get cap_area 2>/dev/null)
+      mode=$(eww get cap_mode 2>/dev/null)
+      sleep 0.12   # let the panel vanish before slurp/grim
+
+      geo=""
+      case "$area" in
+        selection) geo=$(slurp 2>/dev/null); [ -z "$geo" ] && { touch /tmp/.cap-cancel; exit 0; } ;;
+        window)    geo=$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"') ;;
+        screen)    geo="" ;;
+      esac
+
+      if [ "$mode" = "video" ]; then
+        touch /tmp/.cap-done   # unfreeze; recording is live
+        sleep 0.25
+        args=(); [ -n "$geo" ] && args+=(-g "$geo")
+        f="$viddir/rec-$(date +%Y%m%d-%H%M%S).mp4"
+        notify-send "Recording started" "Press Print to stop"
+        setsid -f wf-recorder "''${args[@]}" -f "$f" >/dev/null 2>&1
+      else
+        f="$shotdir/shot-$(date +%Y%m%d-%H%M%S).png"
+        if [ -n "$geo" ]; then grim -g "$geo" "$f"; else grim "$f"; fi
+        touch /tmp/.cap-done
+        [ -f "$f" ] && { wl-copy < "$f"; notify-send -i "$f" "Screenshot saved" "$f"; }
+      fi
     '';
   };
 

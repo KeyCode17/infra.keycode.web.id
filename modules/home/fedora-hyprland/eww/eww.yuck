@@ -142,3 +142,41 @@
                       :anchor "left center")
   (box :class "cal-box"
     (calendar :class "cal")))
+
+
+;; ── screenshot / record control (GNOME-style) ─────────────
+(defvar cap_area "selection")
+(defvar cap_mode "photo")
+(defvar cap_cursor "off")
+
+(defwidget cap-area-btn [id ico lbl]
+  (button :class {cap_area == id ? "cap-area on" : "cap-area"}
+          :onclick "eww update cap_area=${id}"
+    (box :orientation "v" :space-evenly false :spacing 6 :halign "center"
+      (label :class "cap-ico" :text ico)
+      (label :class "cap-lbl" :text lbl))))
+
+(defwidget capture-panel []
+  (box :class "cap-panel" :orientation "v" :space-evenly false :spacing 16
+    (box :halign "end"
+      (button :class "cap-x" :onclick "$HOME/.local/bin/capture-do cancel"
+        (label :text "")))
+    (box :class "cap-areas" :space-evenly true :spacing 12 :halign "fill"
+      (cap-area-btn :id "selection" :ico "" :lbl "Selection")
+      (cap-area-btn :id "screen"    :ico "" :lbl "Screen")
+      (cap-area-btn :id "window"    :ico ""  :lbl "Window"))
+    (box :class "cap-bottom" :space-evenly false :spacing 24 :halign "center" :valign "center"
+      (button :class "cap-mode" :tooltip "Screenshot / Record"
+              :onclick "eww update cap_mode=${cap_mode == 'photo' ? 'video' : 'photo'}"
+        (label :class "cap-ico" :text {cap_mode == "photo" ? "" : ""}))
+      (button :class "cap-shutter" :onclick "$HOME/.local/bin/capture-do go"
+        (label :class "cap-shutter-dot" :text ""))
+      (button :class {cap_cursor == "on" ? "cap-cur on" : "cap-cur"} :tooltip "Include pointer"
+              :onclick "eww update cap_cursor=${cap_cursor == 'on' ? 'off' : 'on'}"
+        (label :class "cap-ico" :text "")))))
+
+(defwindow capture
+  :monitor 0
+  :stacking "overlay"
+  :geometry (geometry :anchor "center" :y "240px")
+  (capture-panel))
