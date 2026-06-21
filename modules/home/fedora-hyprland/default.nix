@@ -780,25 +780,28 @@ $I_REC  Rec screen"
       background-color: @bg;
       border: 2px;
       border-color: @accent;
-      border-radius: 18px;
-      width: 560px;
+      border-radius: 22px;
+      width: 540px;
       location: center;
     }
-    mainbox { padding: 20px; spacing: 16px; children: [ message, listview ]; }
+    mainbox { padding: 24px; spacing: 18px; children: [ message, listview ]; }
     message { border: 0; padding: 0; }
     textbox {
       text-color: @accent;
       horizontal-align: 0.5;
-      font: "CaskaydiaCove Nerd Font Bold 13";
+      font: "CaskaydiaCove Nerd Font Bold 14";
     }
-    listview { columns: 5; lines: 1; spacing: 12px; }
+    listview { columns: 3; lines: 2; spacing: 14px; fixed-height: false; }
     element {
-      orientation: vertical;
-      padding: 18px 6px;
-      border-radius: 14px;
+      padding: 22px 14px;
+      border-radius: 16px;
       background-color: @bg-alt;
+      text-color: @fg;
     }
-    element selected { background-color: @accent; text-color: @bg; }
+    element selected {
+      background-color: @accent;
+      text-color: @bg;
+    }
     element-text { horizontal-align: 0.5; vertical-align: 0.5; }
   '';
 
