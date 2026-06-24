@@ -17,29 +17,29 @@
       xwayland.enable = true;
 
       settings = {
-        "$base" = "rgb(191724)";
-        "$surface" = "rgb(1f1d2e)";
-        "$overlay" = "rgb(26233a)";
-        "$muted" = "rgb(6e6a86)";
-        "$subtle" = "rgb(908caa)";
-        "$text" = "rgb(e0def4)";
-        "$love" = "rgb(eb6f92)";
-        "$gold" = "rgb(f6c177)";
-        "$rose" = "rgb(ebbcba)";
-        "$pine" = "rgb(31748f)";
-        "$foam" = "rgb(9ccfd8)";
-        "$iris" = "rgb(c4a7e7)";
-        "$highlightMed" = "rgb(403d52)";
+        # Nord palette
+        "$base" = "rgb(2e3440)";
+        "$surface" = "rgb(3b4252)";
+        "$overlay" = "rgb(3b4252)";
+        "$muted" = "rgb(4c566a)";
+        "$subtle" = "rgb(d8dee9)";
+        "$text" = "rgb(d8dee9)";
+        "$love" = "rgb(bf616a)";
+        "$gold" = "rgb(ebcb8b)";
+        "$rose" = "rgb(8fbcbb)";
+        "$pine" = "rgb(5e81ac)";
+        "$foam" = "rgb(88c0d0)";
+        "$iris" = "rgb(81a1c1)";
+        "$highlightMed" = "rgb(434c5e)";
 
+        # auto-detect outputs; refine per-monitor after first boot via `hyprctl monitors`
         monitor = [
-          "eDP-1,2880x1800@90,0x0,1.33"
-          "HDMI-A-1,1920x1080@60,auto,0.8"
           ",preferred,auto,1.0"
         ];
 
         exec-once = [
           "hyprctl setcursor Bibata-Modern-Classic 32"
-          "swaybg -i /home/${username}/Downloads/2109.jpg -m fill"
+          "swaybg -c 2e3440"
           "eww open bar"
           "swayosd-server"
           "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
@@ -72,7 +72,7 @@
             enabled = true;
             range = 20;
             render_power = 3;
-            color = "rgba(0f0d1aee)";
+            color = "rgba(232730ee)";
           };
         };
 
@@ -179,10 +179,10 @@
           "$mod SHIFT, E, exit"
           "$mod, V, togglefloating"
           "$mod, F, fullscreen"
-          "$mod, J, layoutmsg, togglesplit"
+          "$mod SHIFT, F, fullscreen, 1"
+          "$mod, T, layoutmsg, togglesplit"
           "$mod SHIFT, B, exec, eww open --toggle bar"
           "$mod SHIFT, T, exec, fix-touchpad"
-          "$mod SHIFT, H, exec, systemctl hibernate"
 
           "$mod, left, movefocus, l"
           "$mod, right, movefocus, r"
@@ -192,6 +192,18 @@
           "$mod, L, movefocus, r"
           "$mod, K, movefocus, u"
           "$mod, J, movefocus, d"
+
+          # move the focused window
+          "$mod SHIFT, left, movewindow, l"
+          "$mod SHIFT, right, movewindow, r"
+          "$mod SHIFT, up, movewindow, u"
+          "$mod SHIFT, down, movewindow, d"
+
+          # resize the focused window
+          "$mod CONTROL, left, resizeactive, -60 0"
+          "$mod CONTROL, right, resizeactive, 60 0"
+          "$mod CONTROL, up, resizeactive, 0 -60"
+          "$mod CONTROL, down, resizeactive, 0 60"
 
           "$mod, 1, workspace, 1"
           "$mod, 2, workspace, 2"
@@ -269,20 +281,13 @@
 
       background {
         monitor =
-        path = ~/Downloads/2109.jpg
-        blur_passes = 4
-        blur_size = 9
-        noise = 0.012
-        contrast = 0.95
-        brightness = 0.65
-        vibrancy = 0.18
-        vibrancy_darkness = 0.05
+        color = rgba(2e3440ff)
       }
 
       label {
         monitor =
         text = cmd[update:1000] echo "$(date +'%H:%M')"
-        color = rgba(224, 222, 244, 0.95)
+        color = rgba(216, 222, 233, 0.95)
         font_size = 120
         font_family = JetBrainsMono Nerd Font ExtraBold
         position = 0, 240
@@ -296,7 +301,7 @@
       label {
         monitor =
         text = cmd[update:30000] echo "$(date +'%A, %d %B %Y')"
-        color = rgba(196, 167, 231, 0.90)
+        color = rgba(129, 161, 193, 0.90)
         font_size = 18
         font_family = JetBrainsMono Nerd Font Medium
         position = 0, 120
@@ -307,10 +312,10 @@
       shape {
         monitor =
         size = 130, 130
-        color = rgba(31, 29, 46, 0.55)
+        color = rgba(59, 66, 82, 0.55)
         rounding = -1
         border_size = 2
-        border_color = rgba(196, 167, 231, 0.60)
+        border_color = rgba(129, 161, 193, 0.60)
         position = 0, -30
         halign = center
         valign = center
@@ -322,7 +327,7 @@
       label {
         monitor =
         text = 󰀄
-        color = rgba(196, 167, 231, 0.90)
+        color = rgba(129, 161, 193, 0.90)
         font_size = 64
         font_family = JetBrainsMono Nerd Font
         position = 0, -30
@@ -333,7 +338,7 @@
       label {
         monitor =
         text = $USER
-        color = rgba(224, 222, 244, 0.95)
+        color = rgba(216, 222, 233, 0.95)
         font_size = 16
         font_family = JetBrainsMono Nerd Font Bold
         position = 0, -135
@@ -349,15 +354,15 @@
         dots_spacing = 0.30
         dots_center = true
         dots_rounding = -1
-        outer_color = rgba(196, 167, 231, 0.55)
-        inner_color = rgba(31, 29, 46, 0.65)
-        font_color = rgba(224, 222, 244, 0.95)
+        outer_color = rgba(129, 161, 193, 0.55)
+        inner_color = rgba(59, 66, 82, 0.65)
+        font_color = rgba(216, 222, 233, 0.95)
         fade_on_empty = false
         rounding = 26
-        check_color = rgba(156, 207, 216, 0.85)
-        fail_color = rgba(235, 111, 146, 0.85)
+        check_color = rgba(136, 192, 208, 0.85)
+        fail_color = rgba(191, 97, 106, 0.85)
         fail_text = <i>$FAIL <b>($ATTEMPTS)</b></i>
-        placeholder_text = <span font_family="JetBrainsMono Nerd Font" foreground="##c4a7e7cc">  Enter password</span>
+        placeholder_text = <span font_family="JetBrainsMono Nerd Font" foreground="##81a1c1cc">  Enter password</span>
         hide_input = false
         position = 0, -200
         halign = center
@@ -370,7 +375,7 @@
       label {
         monitor =
         text = cmd[update:60000] echo "  $(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -1)%"
-        color = rgba(196, 167, 231, 0.75)
+        color = rgba(129, 161, 193, 0.75)
         font_size = 12
         font_family = JetBrainsMono Nerd Font
         position = -20, 20
@@ -381,7 +386,7 @@
       label {
         monitor =
         text = cmd[update:30000] echo "  $(nmcli -t -f active,ssid dev wifi | awk -F: '/^yes/{print $2; exit}' || echo 'offline')"
-        color = rgba(196, 167, 231, 0.75)
+        color = rgba(129, 161, 193, 0.75)
         font_size = 12
         font_family = JetBrainsMono Nerd Font
         position = 20, 20
@@ -393,9 +398,9 @@
     services.mako = {
       enable = true;
       settings = {
-        background-color = "#1f1d2e";
-        text-color = "#e0def4";
-        border-color = "#c4a7e7";
+        background-color = "#3b4252";
+        text-color = "#d8dee9";
+        border-color = "#81a1c1";
         border-size = 3;
         border-radius = 12;
         default-timeout = 5000;
@@ -419,35 +424,35 @@
         font_family = "JetBrainsMono Nerd Font";
         font_size = 14;
 
-        background = "#191724";
-        foreground = "#e0def4";
-        cursor = "#ebbcba";
-        cursor_text_color = "#191724";
-        selection_background = "#403d52";
-        selection_foreground = "#e0def4";
+        background = "#2e3440";
+        foreground = "#d8dee9";
+        cursor = "#8fbcbb";
+        cursor_text_color = "#2e3440";
+        selection_background = "#434c5e";
+        selection_foreground = "#d8dee9";
 
-        active_tab_background = "#c4a7e7";
-        active_tab_foreground = "#191724";
-        inactive_tab_background = "#26233a";
-        inactive_tab_foreground = "#6e6a86";
+        active_tab_background = "#81a1c1";
+        active_tab_foreground = "#2e3440";
+        inactive_tab_background = "#3b4252";
+        inactive_tab_foreground = "#4c566a";
 
-        color0 = "#26233a";
-        color1 = "#eb6f92";
-        color2 = "#31748f";
-        color3 = "#f6c177";
-        color4 = "#9ccfd8";
-        color5 = "#c4a7e7";
-        color6 = "#ebbcba";
-        color7 = "#e0def4";
+        color0 = "#3b4252";
+        color1 = "#bf616a";
+        color2 = "#5e81ac";
+        color3 = "#ebcb8b";
+        color4 = "#88c0d0";
+        color5 = "#81a1c1";
+        color6 = "#8fbcbb";
+        color7 = "#d8dee9";
 
-        color8 = "#6e6a86";
-        color9 = "#eb6f92";
-        color10 = "#31748f";
-        color11 = "#f6c177";
-        color12 = "#9ccfd8";
-        color13 = "#c4a7e7";
-        color14 = "#ebbcba";
-        color15 = "#e0def4";
+        color8 = "#4c566a";
+        color9 = "#bf616a";
+        color10 = "#5e81ac";
+        color11 = "#ebcb8b";
+        color12 = "#88c0d0";
+        color13 = "#81a1c1";
+        color14 = "#8fbcbb";
+        color15 = "#d8dee9";
 
         background_opacity = "0.80";
         dynamic_background_opacity = "yes";
@@ -465,9 +470,9 @@
 
     home.file.".config/swayosd/style.css".text = ''
       window {
-        background: rgba(31, 29, 46, 0.95);
+        background: rgba(59, 66, 82, 0.95);
         border-radius: 20px;
-        border: 2px solid rgba(196, 167, 231, 0.4);
+        border: 2px solid rgba(129, 161, 193, 0.4);
         padding: 12px 20px;
       }
 
@@ -477,27 +482,27 @@
 
       image {
         margin-right: 12px;
-        color: #c4a7e7;
+        color: #81a1c1;
       }
 
       progressbar {
         min-height: 8px;
         border-radius: 4px;
-        background: #26233a;
+        background: #3b4252;
       }
 
       progressbar:disabled {
-        background: #403d52;
+        background: #434c5e;
       }
 
       progressbar progress {
         min-height: 8px;
         border-radius: 4px;
-        background: linear-gradient(90deg, #c4a7e7, #ebbcba);
+        background: linear-gradient(90deg, #81a1c1, #8fbcbb);
       }
 
       label {
-        color: #e0def4;
+        color: #d8dee9;
         font-family: "Quicksand", sans-serif;
         font-weight: 600;
         font-size: 14px;

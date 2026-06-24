@@ -1,16 +1,16 @@
-// Rose Pine - eww side bar styling
+// Nord - eww side bar styling
 
-$base:      #191724;
-$surface:   #1f1d2e;
-$text:      #e0def4;
-$subtle:    #908caa;
-$muted:     #6e6a86;
-$love:      #eb6f92;
-$gold:      #f6c177;
-$rose:      #ebbcba;
-$pine:      #31748f;
-$foam:      #9ccfd8;
-$iris:      #c4a7e7;
+$base:      #2e3440;
+$surface:   #3b4252;
+$text:      #d8dee9;
+$subtle:    #d8dee9;
+$muted:     #4c566a;
+$love:      #bf616a;
+$gold:      #ebcb8b;
+$rose:      #8fbcbb;
+$pine:      #5e81ac;
+$foam:      #88c0d0;
+$iris:      #81a1c1;
 
 * {
   all: unset;
@@ -18,8 +18,8 @@ $iris:      #c4a7e7;
 }
 
 .panel {
-  background-color: rgba(25, 23, 36, 0.55);
-  border: 2px solid rgba(196, 167, 231, 0.55);
+  background-color: rgba(46, 52, 64, 0.55);
+  border: 2px solid rgba(129, 161, 193, 0.55);
   border-radius: 26px;
   margin: 16px 0 16px 8px;
   padding: 18px 0;
@@ -35,14 +35,14 @@ $iris:      #c4a7e7;
 }
 
 .sep {
-  background-color: rgba(196, 167, 231, 0.18);
+  background-color: rgba(129, 161, 193, 0.18);
   border-radius: 1px;
   margin: 2px 16px;
 }
 
 // workspaces
 .ws {
-  background-color: rgba(224, 222, 244, 0.16);
+  background-color: rgba(216, 222, 233, 0.16);
   border-radius: 10px;
   min-width: 12px;
   min-height: 12px;
@@ -50,7 +50,7 @@ $iris:      #c4a7e7;
 }
 
 .ws:hover {
-  background-color: rgba(196, 167, 231, 0.55);
+  background-color: rgba(129, 161, 193, 0.55);
 }
 
 .ws-on {
@@ -61,7 +61,7 @@ $iris:      #c4a7e7;
 
 // caffeine indicator (only visible when active)
 .caffeine-btn {
-  background-color: rgba(246, 193, 119, 0.16);
+  background-color: rgba(235, 203, 139, 0.16);
   border-radius: 12px;
   min-width: 30px;
   min-height: 30px;
@@ -69,7 +69,7 @@ $iris:      #c4a7e7;
 }
 
 .caffeine-btn:hover {
-  background-color: rgba(246, 193, 119, 0.32);
+  background-color: rgba(235, 203, 139, 0.32);
 }
 
 .caffeine-ico {
@@ -161,5 +161,5 @@ $iris:      #c4a7e7;
 
 .power:hover {
   background-color: $love;
-  box-shadow: 0 0 14px rgba(235, 111, 146, 0.75);
+  box-shadow: 0 0 14px rgba(191, 97, 106, 0.75);
 }

@@ -38,8 +38,8 @@
         }
 
         window {
-          background: #191724;
-          border: 1px solid rgba(196, 167, 231, 0.3);
+          background: #2e3440;
+          border: 1px solid rgba(129, 161, 193, 0.3);
           border-radius: 16px;
         }
 
@@ -51,23 +51,23 @@
         #input {
           background: transparent;
           border: none;
-          border-bottom: 1px solid rgba(64, 61, 82, 0.6);
+          border-bottom: 1px solid rgba(67, 76, 94, 0.6);
           border-radius: 0;
           padding: 20px 24px;
-          color: #e0def4;
+          color: #d8dee9;
           font-size: 22px;
           font-weight: 300;
           margin: 0;
         }
 
         #input:focus {
-          border-bottom: 1px solid #c4a7e7;
+          border-bottom: 1px solid #81a1c1;
           box-shadow: none;
           outline: none;
         }
 
         #input image {
-          color: #c4a7e7;
+          color: #81a1c1;
           margin-right: 12px;
         }
 
@@ -96,26 +96,26 @@
         }
 
         #entry:hover {
-          background: rgba(196, 167, 231, 0.15);
+          background: rgba(129, 161, 193, 0.15);
         }
 
         #entry:selected {
-          background: linear-gradient(135deg, #c4a7e7, #ebbcba);
-          box-shadow: 0 2px 8px rgba(196, 167, 231, 0.3);
+          background: linear-gradient(135deg, #81a1c1, #8fbcbb);
+          box-shadow: 0 2px 8px rgba(129, 161, 193, 0.3);
         }
 
         #entry:selected #text {
-          color: #191724;
+          color: #2e3440;
           font-weight: 500;
         }
 
         #text {
-          color: #e0def4;
+          color: #d8dee9;
           margin-left: 12px;
         }
 
         #text:selected {
-          color: #191724;
+          color: #2e3440;
         }
 
         #img {

@@ -9,13 +9,13 @@
       enable = true;
 
       theme = {
-        name = "rose-pine";
-        package = pkgs.rose-pine-gtk-theme;
+        name = "Nordic";
+        package = pkgs.nordic;
       };
 
       iconTheme = {
-        name = "rose-pine";
-        package = pkgs.rose-pine-icon-theme;
+        name = "Nordzy";
+        package = pkgs.nordzy-icon-theme;
       };
 
       cursorTheme = {
@@ -51,13 +51,13 @@
     home.packages = with pkgs; [
       libsForQt5.qtstyleplugin-kvantum
       kdePackages.qtstyleplugin-kvantum
-      rose-pine-kvantum
+      nordic
       adw-gtk3
     ];
 
     xdg.configFile."Kvantum/kvantum.kvconfig".text = ''
       [General]
-      theme=rose-pine-iris
+      theme=Nordic
     '';
 
     home.pointerCursor = {
@@ -71,14 +71,14 @@
     home.sessionVariables = {
       XCURSOR_SIZE = "32";
       XCURSOR_THEME = "Bibata-Modern-Classic";
-      GTK_THEME = "rose-pine:dark";
+      GTK_THEME = "Nordic:dark";
     };
 
     dconf.settings = {
       "org/gnome/desktop/interface" = {
         color-scheme = "prefer-dark";
-        gtk-theme = "rose-pine";
-        icon-theme = "rose-pine";
+        gtk-theme = "Nordic";
+        icon-theme = "Nordzy";
         cursor-theme = "Bibata-Modern-Classic";
         font-name = "Quicksand 11";
         document-font-name = "Quicksand 11";
