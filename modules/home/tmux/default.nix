@@ -54,7 +54,7 @@
       baseIndex = 1;
       keyMode = "vi";
       mouse = true;
-      prefix = "C-a";
+      prefix = "C-Space";
 
       extraConfig = ''
         set -g default-command "${pkgs.zsh}/bin/zsh"

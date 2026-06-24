@@ -7,7 +7,7 @@
 }:
 let
   aerospaceConfig = pkgs.writeText "aerospace.toml" ''
-    # Rosé Pine — Aerospace tiling WM
+    # Nord — Aerospace tiling WM
     # Keybinds mirror workstation (Hyprland/SUPER → macOS/cmd)
 
     start-at-login = true
@@ -88,7 +88,10 @@ let
   '';
 in
 lib.mkIf enableTilingWM {
-  environment.systemPackages = [ pkgs.aerospace pkgs.jankyborders ];
+  environment.systemPackages = [
+    pkgs.aerospace
+    pkgs.jankyborders
+  ];
 
   home-manager.users.${username} = {
     home.file.".aerospace.toml".source = aerospaceConfig;
@@ -99,8 +102,8 @@ lib.mkIf enableTilingWM {
       ProgramArguments = [
         "/run/current-system/sw/bin/borders"
         "width=1.3"
-        "active_color=0xffc4a7e7"
-        "inactive_color=0x40403d52"
+        "active_color=0xff81a1c1"
+        "inactive_color=0x40434c5e"
         "blur_radius=0"
       ];
       KeepAlive = true;

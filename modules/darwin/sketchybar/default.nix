@@ -14,14 +14,14 @@ let
     WS_NUM="''${NAME#space.}"
     if [ "$AEROSPACE_FOCUSED_WORKSPACE" = "$WS_NUM" ]; then
       sketchybar --animate overshoot 15 --set "$NAME" \
-        background.color=0xffc4a7e7 \
+        background.color=0xff81a1c1 \
         background.height=12 \
         background.corner_radius=6 \
         icon.padding_left=10 \
         icon.padding_right=10
     else
       sketchybar --animate overshoot 15 --set "$NAME" \
-        background.color=0x30e0def4 \
+        background.color=0x30d8dee9 \
         background.height=8 \
         background.corner_radius=4 \
         icon.padding_left=1 \
@@ -50,9 +50,9 @@ let
     export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
     IP=$(ipconfig getifaddr en0 2>/dev/null)
     if [ -n "$IP" ]; then
-      sketchybar --set wifi icon="󰖩" icon.color=0xff9ccfd8 label="$IP"
+      sketchybar --set wifi icon="󰖩" icon.color=0xff88c0d0 label="$IP"
     else
-      sketchybar --set wifi icon="󰤮" icon.color=0x886e6a86 label="off"
+      sketchybar --set wifi icon="󰤮" icon.color=0x884c566a label="off"
     fi
   '';
 
@@ -61,24 +61,24 @@ let
     VOL=$(osascript -e "output volume of (get volume settings)" 2>/dev/null)
     MUTED=$(osascript -e "output muted of (get volume settings)" 2>/dev/null)
     if [ "$MUTED" = "true" ]; then
-      sketchybar --set volume icon="󰖁" icon.color=0x886e6a86 label="—"
+      sketchybar --set volume icon="󰖁" icon.color=0x884c566a label="—"
     else
-      sketchybar --set volume icon="󰕾" icon.color=0xff9ccfd8 label="''${VOL}"
+      sketchybar --set volume icon="󰕾" icon.color=0xff88c0d0 label="''${VOL}"
     fi
   '';
 
   brightnessScript = pkgs.writeShellScript "sb-brightness" ''
-    export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
-    BRIGHT=$(python3 -c "
-import ctypes
-ds = ctypes.CDLL('/System/Library/PrivateFrameworks/DisplayServices.framework/DisplayServices')
-ds.DisplayServicesGetBrightness.restype = ctypes.c_int
-val = ctypes.c_float()
-ds.DisplayServicesGetBrightness(1, ctypes.byref(val))
-print(int(val.value * 100))
-" 2>/dev/null)
-    [ -z "$BRIGHT" ] && BRIGHT="—"
-    sketchybar --set brightness icon="󰖨" icon.color=0xfff6c177 label="''${BRIGHT}"
+        export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
+        BRIGHT=$(python3 -c "
+    import ctypes
+    ds = ctypes.CDLL('/System/Library/PrivateFrameworks/DisplayServices.framework/DisplayServices')
+    ds.DisplayServicesGetBrightness.restype = ctypes.c_int
+    val = ctypes.c_float()
+    ds.DisplayServicesGetBrightness(1, ctypes.byref(val))
+    print(int(val.value * 100))
+    " 2>/dev/null)
+        [ -z "$BRIGHT" ] && BRIGHT="—"
+        sketchybar --set brightness icon="󰖨" icon.color=0xffebcb8b label="''${BRIGHT}"
   '';
 
   batteryScript = pkgs.writeShellScript "sb-battery" ''
@@ -86,24 +86,24 @@ print(int(val.value * 100))
     BATT=$(pmset -g batt 2>/dev/null | grep -o "[0-9]*%" | head -1 | tr -d "%")
     AC=$(pmset -g batt 2>/dev/null | grep -c "AC Power" || true)
     if [ "$AC" -gt 0 ]; then
-      sketchybar --set battery icon="󱐋" icon.color=0xff9ccfd8 label="''${BATT}"
+      sketchybar --set battery icon="󱐋" icon.color=0xff88c0d0 label="''${BATT}"
     elif [ "''${BATT:-100}" -le 15 ]; then
-      sketchybar --set battery icon="󱐋" icon.color=0xffeb6f92 label="''${BATT}"
+      sketchybar --set battery icon="󱐋" icon.color=0xffbf616a label="''${BATT}"
     else
-      sketchybar --set battery icon="󱐋" icon.color=0xfff6c177 label="''${BATT}"
+      sketchybar --set battery icon="󱐋" icon.color=0xffebcb8b label="''${BATT}"
     fi
   '';
 
   sketchybarrc = pkgs.writeShellScript "sketchybarrc" ''
-    # Rosé Pine — sketchybar top bar (mirrors eww vertical bar)
+    # Nord — sketchybar top bar (mirrors eww vertical bar)
 
     sketchybar --bar \
       position=top \
       height=40 \
       blur_radius=20 \
-      color=0xdd191724 \
+      color=0xdd2e3440 \
       border_width=1 \
-      border_color=0x30c4a7e7 \
+      border_color=0x3081a1c1 \
       corner_radius=16 \
       margin=12 \
       y_offset=8 \
@@ -112,11 +112,11 @@ print(int(val.value * 100))
     sketchybar --default \
       updates=when_shown \
       icon.font="JetBrainsMono Nerd Font Mono:Regular:16.0" \
-      icon.color=0xffc4a7e7 \
+      icon.color=0xff81a1c1 \
       icon.padding_left=4 \
       icon.padding_right=4 \
       label.font="JetBrainsMono Nerd Font:SemiBold:13.0" \
-      label.color=0xffe0def4 \
+      label.color=0xffd8dee9 \
       label.padding_left=4 \
       label.padding_right=4
 
@@ -124,7 +124,7 @@ print(int(val.value * 100))
     sketchybar --add item logo left \
       --set logo \
         icon="" \
-        icon.color=0xffc4a7e7 \
+        icon.color=0xff81a1c1 \
         icon.font="JetBrainsMono Nerd Font Mono:Regular:22.0" \
         icon.padding_left=16 \
         icon.padding_right=12 \
@@ -141,7 +141,7 @@ print(int(val.value * 100))
           click_script="aerospace workspace ''${i}" \
           icon.drawing=off \
           label.drawing=off \
-          background.color=0x30e0def4 \
+          background.color=0x30d8dee9 \
           background.corner_radius=4 \
           background.height=8 \
           icon=" " \
@@ -162,7 +162,7 @@ print(int(val.value * 100))
         update_freq=10 \
         script="${wifiScript}" \
         icon="󰖩" \
-        icon.color=0xff9ccfd8 \
+        icon.color=0xff88c0d0 \
         icon.padding_left=10 \
         icon.padding_right=4 \
         label="..." \
@@ -174,7 +174,7 @@ print(int(val.value * 100))
         update_freq=3 \
         script="${volumeScript}" \
         icon="󰕾" \
-        icon.color=0xff9ccfd8 \
+        icon.color=0xff88c0d0 \
         icon.padding_left=10 \
         icon.padding_right=4 \
         label="..." \
@@ -186,7 +186,7 @@ print(int(val.value * 100))
         update_freq=5 \
         script="${brightnessScript}" \
         icon="󰖨" \
-        icon.color=0xfff6c177 \
+        icon.color=0xffebcb8b \
         icon.padding_left=10 \
         icon.padding_right=4 \
         label="..." \
@@ -198,7 +198,7 @@ print(int(val.value * 100))
         update_freq=30 \
         script="${batteryScript}" \
         icon="󱐋" \
-        icon.color=0xfff6c177 \
+        icon.color=0xffebcb8b \
         icon.padding_left=10 \
         icon.padding_right=4 \
         label="..." \
@@ -212,7 +212,7 @@ print(int(val.value * 100))
         script="${clockMonthScript}" \
         icon.drawing=off \
         label.font="JetBrainsMono Nerd Font:Bold:13.0" \
-        label.color=0xff908caa \
+        label.color=0xffd8dee9 \
         label.padding_left=2 \
         label.padding_right=18
 
@@ -222,7 +222,7 @@ print(int(val.value * 100))
         script="${clockDateScript}" \
         icon.drawing=off \
         label.font="JetBrainsMono Nerd Font:Bold:16.0" \
-        label.color=0xffe0def4 \
+        label.color=0xffd8dee9 \
         label.padding_left=10 \
         label.padding_right=2
 
@@ -232,7 +232,7 @@ print(int(val.value * 100))
         script="${clockMScript}" \
         icon.drawing=off \
         label.font="JetBrainsMono Nerd Font:Bold:18.0" \
-        label.color=0xffc4a7e7 \
+        label.color=0xff81a1c1 \
         label.padding_left=2 \
         label.padding_right=2
 
@@ -241,7 +241,7 @@ print(int(val.value * 100))
         icon.drawing=off \
         label="·" \
         label.font="JetBrainsMono Nerd Font:Bold:18.0" \
-        label.color=0xffeb6f92 \
+        label.color=0xffbf616a \
         label.padding_left=4 \
         label.padding_right=4
 
@@ -251,7 +251,7 @@ print(int(val.value * 100))
         script="${clockHScript}" \
         icon.drawing=off \
         label.font="JetBrainsMono Nerd Font:Bold:18.0" \
-        label.color=0xffebbcba \
+        label.color=0xff8fbcbb \
         label.padding_left=18 \
         label.padding_right=0
 
