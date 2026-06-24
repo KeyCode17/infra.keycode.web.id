@@ -55,66 +55,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    personal-website = {
-      url = "github:maulanasdqn/personal-website/develop";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    hpyd = {
-      url = "github:maulanasdqn/high-performance-youtube-downloader/develop";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    rkm-backend = {
-      url = "git+ssh://git@github.com/rajawalikaryamulya/rkm-backend.git?ref=develop";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    rkm-frontend = {
-      url = "git+ssh://git@github.com/rajawalikaryamulya/rkm-frontend.git?ref=develop";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    rkm-admin-frontend = {
-      url = "git+ssh://git@github.com/rajawalikaryamulya/rkm-admin-frontend.git?ref=develop";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    nix-pilot = {
-      url = "github:maulanasdqn/nix-pilot/develop";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    rag-app = {
-      url = "github:maulanasdqn/rust-rag-example/develop";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    roasting-startup = {
-      url = "github:maulanasdqn/roasting-startup/main";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    verychic-frontend = {
-      url = "git+ssh://git@github.com/mrscraper-com/verychic-frontend.git?ref=testing";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    kilat-app = {
-      url = "git+ssh://git@github.com/maulanasdqn/kilat-app.git?ref=develop";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    warehouse-management = {
-      url = "git+ssh://git@github.com/maulanasdqn/warehouse-management.git?ref=main";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    shopee-tw = {
-      url = "git+ssh://git@github.com/maulanasdqn/shopee-tw-steve.git?ref=develop";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     clan-core = {
       url = "https://git.clan.lol/clan/clan-core/archive/main.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -124,27 +64,6 @@
       url = "github:sadjow/claude-code-nix";
     };
 
-    claude-desktop = {
-      url = "github:k3d3/claude-desktop-linux-flake";
-      inputs.nixpkgs.follows = "nixpkgs-stable";
-    };
-
-    nix-on-droid = {
-      url = "github:maulanasdqn/nix-on-droid/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
-    };
-
-    nixos-wsl = {
-      url = "github:nix-community/NixOS-WSL/main";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # dinix - disabled until flake.nix is added to repo
-    # dinix = {
-    #   url = "github:lillecarl/dinix";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
   };
 
   outputs =
@@ -161,23 +80,8 @@
       homebrew-core,
       homebrew-cask,
       disko,
-      personal-website,
-      hpyd,
-      rkm-backend,
-      rkm-frontend,
-      rkm-admin-frontend,
-      nix-pilot,
-      rag-app,
-      roasting-startup,
-      verychic-frontend,
-      kilat-app,
-      warehouse-management,
-      shopee-tw,
       clan-core,
       claude-code,
-      claude-desktop,
-      nix-on-droid,
-      nixos-wsl,
       ...
     }:
     let
@@ -200,7 +104,6 @@
 
       inherit (config)
         sshKeys
-        acmeEmail
         enableLaravel
         enableRust
         enableVolta
@@ -227,52 +130,6 @@
           ;
       };
 
-      workstationSpecialArgs = {
-        username = config.workstationUsername;
-        enableTilingWM = config.workstationEnableTilingWM;
-        inherit
-          nixvim
-          enableLaravel
-          enableRust
-          enableVolta
-          enableGolang
-          sshKeys
-          claude-code
-          claude-desktop
-          ;
-      };
-
-      wslSpecialArgs = {
-        username = config.wslUsername;
-        enableTilingWM = false;
-        inherit
-          nixvim
-          enableLaravel
-          enableRust
-          enableVolta
-          enableGolang
-          sshKeys
-          claude-code
-          ;
-      };
-
-      hostingerSpecialArgs = {
-        username = "root";
-        hostname = config.vpsHostingerHostname;
-        ipAddress = config.vpsHostingerIP;
-        gateway = config.vpsHostingerGateway;
-        enableLaravel = false;
-        inherit nixvim sshKeys acmeEmail sops-nix secretsFile kilat-app warehouse-management shopee-tw;
-        inherit rkm-frontend rkm-admin-frontend verychic-frontend;
-      };
-
-      digitaloceanSpecialArgs = {
-        username = config.vpsDigitalOceanUsername;
-        hostname = config.vpsDigitalOceanHostname;
-        enableLaravel = false;
-        inherit nixvim sshKeys acmeEmail;
-      };
-
       isDarwin =
         system:
         builtins.elem system [
@@ -281,8 +138,8 @@
         ];
       clan = clan-core.lib.clan {
         inherit self;
-        meta.name = "msdqn";
-        meta.domain = "msdqn.dev";
+        meta.name = "keycode";
+        meta.domain = "keycode.web.id";
 
         inventory = {
           services = { };
@@ -319,87 +176,12 @@
                 {
                   _module.args = darwinSpecialArgs;
                   # Local machine - requires SSH enabled on Mac (System Settings > Sharing > Remote Login)
-                  clan.core.networking.targetHost = "ms@localhost";
+                  clan.core.networking.targetHost = "keycode@localhost";
                 }
               )
             ];
           };
 
-          # NixOS Workstation
-          ${config.workstationHostname} = {
-            nixpkgs.hostPlatform = "x86_64-linux";
-            imports = [
-              ./hosts/workstation
-              home-manager.nixosModules.home-manager
-              {
-                home-manager = {
-                  useGlobalPkgs = true;
-                  useUserPackages = true;
-                  extraSpecialArgs = workstationSpecialArgs;
-                  backupFileExtension = "backup";
-                };
-              }
-              ./modules/home/nixos.nix
-              (
-                { ... }:
-                {
-                  _module.args = workstationSpecialArgs;
-                }
-              )
-            ];
-          };
-
-          # Hostinger VPS
-          hostinger = {
-            nixpkgs.hostPlatform = "x86_64-linux";
-            imports = [
-              # disko and sops-nix are provided by clan-core
-              personal-website.nixosModules.default
-              rkm-backend.nixosModules.default
-              rkm-frontend.nixosModules.default
-              rkm-admin-frontend.nixosModules.default
-              # roasting-startup.nixosModules.default
-              verychic-frontend.nixosModules.default
-              # kilat-app.nixosModules.default
-              warehouse-management.nixosModules.default
-              shopee-tw.nixosModules.default
-              # rag-app.nixosModules.default  # Temporarily disabled
-              # nix-pilot.nixosModules.default  # Disabled - needs recursion_limit fix in np-ui
-              ./hosts/vps/hostinger
-              (
-                { ... }:
-                {
-                  _module.args = hostingerSpecialArgs;
-                  clan.core.networking.targetHost = config.vpsHostingerIP;
-                }
-              )
-            ];
-          };
-
-          # DigitalOcean VPS
-          digitalocean = {
-            nixpkgs.hostPlatform = "x86_64-linux";
-            imports = [
-              # disko is provided by clan-core
-              ./hosts/vps/digitalocean
-              home-manager.nixosModules.home-manager
-              {
-                home-manager = {
-                  useGlobalPkgs = true;
-                  useUserPackages = true;
-                  extraSpecialArgs = digitaloceanSpecialArgs;
-                  backupFileExtension = "backup";
-                };
-              }
-              ./modules/home/nixos-server.nix
-              (
-                { ... }:
-                {
-                  _module.args = digitaloceanSpecialArgs;
-                }
-              )
-            ];
-          };
         };
       };
     in
@@ -407,43 +189,6 @@
       # Inherit configurations from clan
       inherit (clan.config) darwinConfigurations clanInternals;
       clan = clan.config;
-
-      nixosConfigurations = clan.config.nixosConfigurations // {
-        wsl = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          specialArgs = wslSpecialArgs;
-          modules = [
-            nixos-wsl.nixosModules.default
-            ./hosts/wsl
-            home-manager.nixosModules.home-manager
-            {
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                extraSpecialArgs = wslSpecialArgs;
-                backupFileExtension = "backup";
-              };
-            }
-            ./modules/home/wsl.nix
-          ];
-        };
-      };
-
-      nixOnDroidConfigurations.default = nix-on-droid.lib.nixOnDroidConfiguration {
-        pkgs = import nixpkgs {
-          system = "aarch64-linux";
-          overlays = [ nix-on-droid.overlays.default ];
-        };
-        modules = [ ./hosts/android ];
-      };
-
-      nixOnDroidConfigurations.android = nix-on-droid.lib.nixOnDroidConfiguration {
-        pkgs = import nixpkgs {
-          system = "aarch64-linux";
-          overlays = [ nix-on-droid.overlays.default ];
-        };
-        modules = [ ./hosts/android ];
-      };
 
       # Fedora (and other non-NixOS Linux): standalone home-manager.
       # Apply with: home-manager switch --flake .#<fedoraUsername>

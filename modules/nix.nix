@@ -8,7 +8,5 @@
       "build-time-fetch-tree"
       "parallel-eval"
     ];
-    extra-substituters = [ "https://nix-on-droid.cachix.org" ];
-    extra-trusted-public-keys = [ "nix-on-droid.cachix.org-1:56snoMJTXmDRC1Ei24CmKoUqZOperNq8/1S+LFagarA=" ];
   };
 }

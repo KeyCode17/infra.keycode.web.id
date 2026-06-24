@@ -17,16 +17,11 @@
 
         declare -A SESSIONS
         SESSIONS=(
-          ["Nix Darwin"]="$HOME/.config/nix"
-          ["MRScraperV3"]="$HOME/Development/mrscraper/mrscraper-v3"
-          ["MRScraperWEB"]="$HOME/Development/mrscraper/mrscraper-web"
-          ["YDM FE"]="$HOME/Development/bsm/yes-date-me-frontend"
-          ["YDM BE"]="$HOME/Development/bsm/yes-date-me-backend"
-          ["ECHO"]="$HOME/Development/bsm/social-media-automation"
-          ["BSM Landing"]="$HOME/Development/bsm/bsmart-landing"
+          ["nix"]="$HOME/.config/nix"
+          ["home"]="$HOME"
         )
 
-        SESSION_ORDER=("Nix Darwin" "MRScraperV3" "MRScraperWEB" "YDM FE" "YDM BE" "ECHO" "BSM Landing")
+        SESSION_ORDER=("nix" "home")
 
         for name in "''${SESSION_ORDER[@]}"; do
           dir="''${SESSIONS[$name]}"
@@ -40,7 +35,7 @@
         done
 
         if [ -z "$TMUX" ]; then
-          tmux attach-session -t "Nix Darwin"
+          tmux attach-session -t "nix"
         fi
       '';
     };

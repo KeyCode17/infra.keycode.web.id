@@ -1,4 +1,9 @@
-{ username, sshKeys, lib, ... }:
+{
+  username,
+  sshKeys,
+  lib,
+  ...
+}:
 {
   home-manager.users.${username} = {
     programs.ssh = {
@@ -10,15 +15,10 @@
             AddKeysToAgent = "yes";
           };
         };
-        "jl" = {
-          hostname = "192.168.201.28";
-          user = "mrscrapersupport";
-          port = 22;
-        };
       };
     };
 
-    home.file.".ssh/authorized_keys" = lib.mkIf (sshKeys != []) {
+    home.file.".ssh/authorized_keys" = lib.mkIf (sshKeys != [ ]) {
       text = lib.concatStringsSep "\n" sshKeys + "\n";
     };
   };

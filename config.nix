@@ -3,27 +3,10 @@
   darwinHostname = "your-hostname";
   darwinEnableTilingWM = true;
 
-  workstationUsername = "your-username";
-  workstationHostname = "workstation";
-  workstationEnableTilingWM = true;
-
-  wslUsername = "your-username";
-  wslHostname = "wsl";
-
   fedoraUsername = "your-username";
   fedoraHostname = "fedora";
 
-  vpsHostingerUsername = "your-username";
-  vpsHostingerHostname = "your-hostname";
-  vpsHostingerIP = "0.0.0.0";
-  vpsHostingerGateway = "0.0.0.0";
-
-  acmeEmail = "your-email@example.com";
-
-  vpsDigitalOceanUsername = "your-username";
-  vpsDigitalOceanHostname = "droplet";
-
-  enableLaravel = true;
+  enableLaravel = false;
   enableRust = true;
   enableVolta = true;
   enableGolang = false;
