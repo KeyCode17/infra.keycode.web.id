@@ -31,7 +31,11 @@ let
 
   clockHScript = pkgs.writeShellScript "sb-clock-h" ''
     export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
-    sketchybar --set clock_h label="$(date +'%H')"
+    sketchybar --set clock_h label="$(date +'%I')"
+  '';
+  clockPScript = pkgs.writeShellScript "sb-clock-p" ''
+    export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
+    sketchybar --set clock_p label="$(date +'%p')"
   '';
   clockMScript = pkgs.writeShellScript "sb-clock-m" ''
     export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
@@ -46,13 +50,51 @@ let
     sketchybar --set clock_month label="$(date +'%b')"
   '';
 
+  # Alt+Shift+B (bound in AeroSpace) hides the whole bar AND drops the top gap to 0
+  # so windows reclaim that space and go full-height; pressing again restores both.
+  # Needs ~/.aerospace.toml to be a writable file (see the aerospace module).
+  # Exposed at ~/.local/bin/sketchybar-bar-toggle.
+  barToggleScript = pkgs.writeShellScript "sb-bar-toggle" ''
+    export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
+    STATE="/tmp/.sketchybar-barhidden"
+    CFG="$HOME/.aerospace.toml"
+    AS="/run/current-system/sw/bin/aerospace"
+    set_gap() {
+      sed -E "s/^[[:space:]]*outer\.top[[:space:]]*=.*/    outer.top       = $1/" "$CFG" > "$CFG.tmp" && mv "$CFG.tmp" "$CFG"
+    }
+    if [ -f "$STATE" ]; then
+      # currently hidden -> SHOW bar + restore the 20px top gap
+      rm -f "$STATE"
+      sketchybar --bar hidden=off
+      set_gap 20
+    else
+      # currently shown -> HIDE bar + remove top gap (windows go full to the top)
+      touch "$STATE"
+      sketchybar --bar hidden=on
+      set_gap 0
+    fi
+    sleep 0.2
+    "$AS" reload-config
+  '';
+
   wifiScript = pkgs.writeShellScript "sb-wifi" ''
     export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
-    IP=$(ipconfig getifaddr en0 2>/dev/null)
-    if [ -n "$IP" ]; then
-      sketchybar --set wifi icon="󰖩" icon.color=0xff88c0d0 label="$IP"
-    else
+    # Interface actually carrying the default route (internet)
+    IFACE=$(route -n get default 2>/dev/null | awk '/interface:/{print $2; exit}')
+    # Which device is the Wi-Fi card
+    WIFI_DEV=$(networksetup -listallhardwareports 2>/dev/null | awk '/Wi-Fi/{getline; print $2; exit}')
+
+    if [ -z "$IFACE" ]; then
+      # not connected
       sketchybar --set wifi icon="󰤮" icon.color=0x884c566a label="off"
+    elif [ "$IFACE" = "$WIFI_DEV" ]; then
+      # on Wi-Fi -> show network name (SSID), not the IP
+      SSID=$(networksetup -getairportnetwork "$WIFI_DEV" 2>/dev/null | sed -n 's/^Current Wi-Fi Network: //p' | cut -c1-14)
+      [ -z "$SSID" ] && SSID="Wi-Fi"
+      sketchybar --set wifi icon="󰖩" icon.color=0xff88c0d0 label="$SSID"
+    else
+      # on wired Ethernet
+      sketchybar --set wifi icon="󰈀" icon.color=0xff88c0d0 label="LAN"
     fi
   '';
 
@@ -111,11 +153,11 @@ let
 
     sketchybar --default \
       updates=when_shown \
-      icon.font="JetBrainsMono Nerd Font Mono:Regular:16.0" \
+      icon.font="CaskaydiaCove Nerd Font Mono:Regular:16.0" \
       icon.color=0xff81a1c1 \
       icon.padding_left=4 \
       icon.padding_right=4 \
-      label.font="JetBrainsMono Nerd Font:SemiBold:13.0" \
+      label.font="CaskaydiaCove Nerd Font:SemiBold:13.0" \
       label.color=0xffd8dee9 \
       label.padding_left=4 \
       label.padding_right=4
@@ -125,7 +167,7 @@ let
       --set logo \
         icon="" \
         icon.color=0xff81a1c1 \
-        icon.font="JetBrainsMono Nerd Font Mono:Regular:22.0" \
+        icon.font="CaskaydiaCove Nerd Font Mono:Regular:22.0" \
         icon.padding_left=16 \
         icon.padding_right=12 \
         label.drawing=off
@@ -145,7 +187,7 @@ let
           background.corner_radius=4 \
           background.height=8 \
           icon=" " \
-          icon.font="JetBrainsMono Nerd Font:Regular:1.0" \
+          icon.font="CaskaydiaCove Nerd Font:Regular:1.0" \
           icon.drawing=on \
           icon.padding_left=1 \
           icon.padding_right=1 \
@@ -211,7 +253,7 @@ let
         update_freq=1800 \
         script="${clockMonthScript}" \
         icon.drawing=off \
-        label.font="JetBrainsMono Nerd Font:Bold:13.0" \
+        label.font="CaskaydiaCove Nerd Font:Bold:13.0" \
         label.color=0xffd8dee9 \
         label.padding_left=2 \
         label.padding_right=18
@@ -221,9 +263,19 @@ let
         update_freq=1800 \
         script="${clockDateScript}" \
         icon.drawing=off \
-        label.font="JetBrainsMono Nerd Font:Bold:16.0" \
+        label.font="CaskaydiaCove Nerd Font:Bold:16.0" \
         label.color=0xffd8dee9 \
         label.padding_left=10 \
+        label.padding_right=2
+
+    sketchybar --add item clock_p right \
+      --set clock_p \
+        update_freq=5 \
+        script="${clockPScript}" \
+        icon.drawing=off \
+        label.font="CaskaydiaCove Nerd Font:Bold:11.0" \
+        label.color=0xff88c0d0 \
+        label.padding_left=3 \
         label.padding_right=2
 
     sketchybar --add item clock_m right \
@@ -231,7 +283,7 @@ let
         update_freq=5 \
         script="${clockMScript}" \
         icon.drawing=off \
-        label.font="JetBrainsMono Nerd Font:Bold:18.0" \
+        label.font="CaskaydiaCove Nerd Font:Bold:18.0" \
         label.color=0xff81a1c1 \
         label.padding_left=2 \
         label.padding_right=2
@@ -240,7 +292,7 @@ let
       --set clock_sep \
         icon.drawing=off \
         label="·" \
-        label.font="JetBrainsMono Nerd Font:Bold:18.0" \
+        label.font="CaskaydiaCove Nerd Font:Bold:18.0" \
         label.color=0xffbf616a \
         label.padding_left=4 \
         label.padding_right=4
@@ -250,7 +302,7 @@ let
         update_freq=5 \
         script="${clockHScript}" \
         icon.drawing=off \
-        label.font="JetBrainsMono Nerd Font:Bold:18.0" \
+        label.font="CaskaydiaCove Nerd Font:Bold:18.0" \
         label.color=0xff8fbcbb \
         label.padding_left=18 \
         label.padding_right=0
@@ -276,6 +328,10 @@ lib.mkIf enableTilingWM {
   home-manager.users.${username} = {
     home.file.".config/sketchybar/sketchybarrc" = {
       source = sketchybarrc;
+      executable = true;
+    };
+    home.file.".local/bin/sketchybar-bar-toggle" = {
+      source = barToggleScript;
       executable = true;
     };
   };

@@ -3,7 +3,7 @@
   home-manager.users.${username}.programs.kitty = {
     enable = true;
     settings = {
-      font_family = "JetBrainsMono Nerd Font";
+      font_family = "CaskaydiaCove Nerd Font";
       font_size = 14;
 
       background = "#2e3440";
@@ -41,7 +41,10 @@
 
       macos_titlebar_color = "background";
       macos_option_as_alt = "yes";
-      hide_window_decorations = "yes";
+      # titlebar-only (not "yes") hides the macOS title bar but KEEPS the
+      # rounded window corners + shadow, so the window blends with the rounded
+      # sketchybar above and has rounded (not pointy) bottom corners.
+      hide_window_decorations = "titlebar-only";
 
       clipboard_control = "write-clipboard write-primary read-clipboard read-primary";
     };

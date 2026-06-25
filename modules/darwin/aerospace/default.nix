@@ -23,10 +23,10 @@ let
     [gaps]
     inner.horizontal = 8
     inner.vertical   = 8
-    outer.left       = 10
-    outer.bottom     = 10
-    outer.top        = 15
-    outer.right      = 10
+    outer.left       = 16
+    outer.bottom     = 16
+    outer.top        = 20
+    outer.right      = 16
 
     [mode.main.binding]
     # Terminal / launcher
@@ -82,7 +82,7 @@ let
 
     # Window / system
     alt-shift-q = 'close'
-    alt-shift-b = 'exec-and-forget /usr/local/bin/sketchybar --bar hidden=toggle'
+    alt-shift-b = 'exec-and-forget /Users/karyudi/.local/bin/sketchybar-bar-toggle'
     alt-ctrl-0  = 'exec-and-forget pmset displaysleepnow'
     alt-shift-r = 'reload-config'
   '';
@@ -93,17 +93,29 @@ lib.mkIf enableTilingWM {
     pkgs.jankyborders
   ];
 
-  home-manager.users.${username} = {
-    home.file.".aerospace.toml".source = aerospaceConfig;
-  };
+  # Install ~/.aerospace.toml as a WRITABLE copy (not a read-only nix symlink) so
+  # the Alt+Shift+B bar toggle can rewrite `outer.top` at runtime + reload-config.
+  # Re-copied (reset to the default 20px gap) on every rebuild.
+  home-manager.users.${username}.imports = [
+    (
+      { lib, ... }:
+      {
+        home.activation.aerospaceWritableConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          rm -f "$HOME/.aerospace.toml"
+          install -m 0644 ${aerospaceConfig} "$HOME/.aerospace.toml"
+        '';
+      }
+    )
+  ];
 
   launchd.user.agents.borders = {
     serviceConfig = {
       ProgramArguments = [
         "/run/current-system/sw/bin/borders"
-        "width=1.3"
-        "active_color=0xff81a1c1"
-        "inactive_color=0x40434c5e"
+        "width=2.0"
+        # iris -> rose gradient, matching Fedora Hyprland's col.active_border
+        "active_color=gradient(top_left=0xff81a1c1,bottom_right=0xff8fbcbb)"
+        "inactive_color=0xff434c5e"
         "blur_radius=0"
       ];
       KeepAlive = true;

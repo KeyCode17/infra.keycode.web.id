@@ -1,7 +1,11 @@
 { username, pkgs, config, ... }:
 let
-  wallpaper = pkgs.nixos-artwork.wallpapers.catppuccin-mocha;
-  wallpaperPath = "${wallpaper}/share/backgrounds/nixos/nix-wallpaper-catppuccin-mocha.png";
+  # Solid Nord base (#2e3440) wallpaper, matching the Fedora desktop (swaybg -c 2e3440).
+  wallpaper = pkgs.runCommand "nord-solid-wallpaper" { } ''
+    mkdir -p $out
+    ${pkgs.imagemagick}/bin/magick -size 2880x1800 xc:'#2e3440' $out/nord-2e3440.png
+  '';
+  wallpaperPath = "${wallpaper}/nord-2e3440.png";
 in
 {
   home-manager.users.${username} = { lib, ... }: {

@@ -21,31 +21,4 @@
   power.sleep.display = 10;
   power.sleep.harddisk = 10;
   system.primaryUser = username;
-
-  system.keyboard = {
-    enableKeyMapping = true;
-    userKeyMapping = [
-      {
-        HIDKeyboardModifierMappingSrc = 30064771129;
-        HIDKeyboardModifierMappingDst = 30064771113;
-      }
-      {
-        HIDKeyboardModifierMappingSrc = 30064771113;
-        HIDKeyboardModifierMappingDst = 30064771129;
-      }
-    ];
-  };
-
-  launchd.daemons.keyboard-remap = {
-    serviceConfig = {
-      Label = "com.local.keyboard-remap";
-      ProgramArguments = [
-        "/usr/bin/hidutil"
-        "property"
-        "--set"
-        ''{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":30064771129,"HIDKeyboardModifierMappingDst":30064771113},{"HIDKeyboardModifierMappingSrc":30064771113,"HIDKeyboardModifierMappingDst":30064771129}]}''
-      ];
-      RunAtLoad = true;
-    };
-  };
 }

@@ -60,12 +60,16 @@
       NSDisableAutomaticTermination = true;
     };
 
-    "com.apple.universalaccess" = {
-      # Disable transparency — less GPU compositing overhead
-      reduceTransparency = true;
-      # Disable motion animations system-wide
-      reduceMotion = true;
-    };
+    # NOTE: com.apple.universalaccess is a TCC-protected domain — `defaults write`
+    # against it fails ("Could not write domain ...; exiting") during activation
+    # unless the activating process has Full Disk Access, which a fresh Mac lacks.
+    # Set these by hand in System Settings → Accessibility → Display instead.
+    # "com.apple.universalaccess" = {
+    #   # Disable transparency — less GPU compositing overhead
+    #   reduceTransparency = true;
+    #   # Disable motion animations system-wide
+    #   reduceMotion = true;
+    # };
 
     "com.apple.finder" = {
       DisableAllAnimations = true;
@@ -77,4 +81,9 @@
     InitialKeyRepeat = 10;
     _HIHideMenuBar = true;
   };
+
+  # Clean, bare desktop to match the Fedora solid-color desktop: no icons, no widgets.
+  system.defaults.finder.CreateDesktop = false;
+  system.defaults.WindowManager.StandardHideWidgets = true;
+  system.defaults.WindowManager.StageManagerHideWidgets = true;
 }
