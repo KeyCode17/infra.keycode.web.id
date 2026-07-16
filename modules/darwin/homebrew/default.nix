@@ -21,6 +21,7 @@
       "figma"
       "pritunl"
       "postman"
+      "visual-studio-code"
     ];
   };
 }
