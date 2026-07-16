@@ -50,6 +50,19 @@ let
     sketchybar --set clock_month label="$(date +'%b')"
   '';
 
+  # Caffeine indicator — coffee icon shown only while caffeine mode is ON
+  # (i.e. ~/.local/bin/caffeine-toggle has a live pidfile). Hidden otherwise.
+  # Refreshed instantly by the toggle via `--trigger caffeine_change`.
+  caffeineScript = pkgs.writeShellScript "sb-caffeine" ''
+    export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
+    PIDFILE="/tmp/caffeine-toggle.pid"
+    if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+      sketchybar --set caffeine drawing=on
+    else
+      sketchybar --set caffeine drawing=off
+    fi
+  '';
+
   # Alt+Shift+B (bound in AeroSpace) hides the whole bar AND drops the top gap to 0
   # so windows reclaim that space and go full-height; pressing again restores both.
   # Needs ~/.aerospace.toml to be a writable file (see the aerospace module).
@@ -197,6 +210,22 @@ let
           padding_right=6 \
         --subscribe "space.''${i}" aerospace_workspace_change
     done
+
+    # Caffeine mode indicator (hidden unless active). Click also toggles.
+    sketchybar --add event caffeine_change
+    sketchybar --add item caffeine right \
+      --set caffeine \
+        script="${caffeineScript}" \
+        updates=on \
+        drawing=off \
+        icon="$(printf '\363\260\205\266')" \
+        icon.color=0xffebcb8b \
+        icon.font="CaskaydiaCove Nerd Font Mono:Regular:16.0" \
+        icon.padding_left=10 \
+        icon.padding_right=10 \
+        label.drawing=off \
+        click_script="/Users/karyudi/.local/bin/caffeine-toggle" \
+      --subscribe caffeine caffeine_change
 
     # Status items — consistent icon+label spacing
     sketchybar --add item wifi right \

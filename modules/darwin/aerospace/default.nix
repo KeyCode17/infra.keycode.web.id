@@ -6,6 +6,23 @@
   ...
 }:
 let
+  # Caffeine toggle — mirrors Fedora Hyprland `caffeine` (stop/start idle daemon).
+  # Toggles a backgrounded `caffeinate` process; notifies on each switch.
+  caffeineToggle = pkgs.writeShellScript "caffeine-toggle" ''
+    PIDFILE="/tmp/caffeine-toggle.pid"
+    if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+      kill "$(cat "$PIDFILE")" 2>/dev/null
+      rm -f "$PIDFILE"
+      /usr/bin/osascript -e 'display notification "Normal idle & display sleep restored" with title "Caffeine OFF"'
+    else
+      /usr/bin/caffeinate -disu &
+      echo $! > "$PIDFILE"
+      /usr/bin/osascript -e 'display notification "Idle lock & sleep disabled" with title "☕ Caffeine ON"'
+    fi
+    # Refresh the sketchybar coffee indicator immediately (if bar is running).
+    /usr/local/bin/sketchybar --trigger caffeine_change 2>/dev/null || true
+  '';
+
   aerospaceConfig = pkgs.writeText "aerospace.toml" ''
     # Nord — Aerospace tiling WM
     # Keybinds mirror workstation (Hyprland/SUPER → macOS/cmd)
@@ -83,6 +100,7 @@ let
     # Window / system
     alt-shift-q = 'close'
     alt-shift-b = 'exec-and-forget /Users/karyudi/.local/bin/sketchybar-bar-toggle'
+    cmd-shift-x = 'exec-and-forget /Users/karyudi/.local/bin/caffeine-toggle'
     alt-ctrl-0  = 'exec-and-forget pmset displaysleepnow'
     alt-shift-r = 'reload-config'
   '';
@@ -96,17 +114,24 @@ lib.mkIf enableTilingWM {
   # Install ~/.aerospace.toml as a WRITABLE copy (not a read-only nix symlink) so
   # the Alt+Shift+B bar toggle can rewrite `outer.top` at runtime + reload-config.
   # Re-copied (reset to the default 20px gap) on every rebuild.
-  home-manager.users.${username}.imports = [
-    (
-      { lib, ... }:
-      {
-        home.activation.aerospaceWritableConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-          rm -f "$HOME/.aerospace.toml"
-          install -m 0644 ${aerospaceConfig} "$HOME/.aerospace.toml"
-        '';
-      }
-    )
-  ];
+  home-manager.users.${username} = {
+    home.file.".local/bin/caffeine-toggle" = {
+      source = caffeineToggle;
+      executable = true;
+    };
+
+    imports = [
+      (
+        { lib, ... }:
+        {
+          home.activation.aerospaceWritableConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            rm -f "$HOME/.aerospace.toml"
+            install -m 0644 ${aerospaceConfig} "$HOME/.aerospace.toml"
+          '';
+        }
+      )
+    ];
+  };
 
   launchd.user.agents.borders = {
     serviceConfig = {
