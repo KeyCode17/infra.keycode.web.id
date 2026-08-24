@@ -116,7 +116,7 @@ in
 
       input = {
         kb_layout = "us";
-        kb_options = "caps:escape";
+        kb_options = "caps:swapescape";
         follow_mouse = 1;
         sensitivity = 0.0;
         accel_profile = "adaptive";
