@@ -17,6 +17,7 @@
     ./services
     ./aerospace
     ./sketchybar
+    ./network
     ./android.nix
   ];
 
