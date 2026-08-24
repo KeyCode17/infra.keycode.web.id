@@ -225,6 +225,7 @@
 
       lazygit
       gh
+      glab
       delta
 
       ncdu

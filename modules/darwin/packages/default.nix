@@ -1,7 +1,6 @@
 {
   pkgs,
   clan-core,
-  claude-code,
   ...
 }:
 {
@@ -10,8 +9,11 @@
     curl
     wget
     gh
+    glab
     (callPackage ../../../pkgs/rtk { })
     clan-core.packages.aarch64-darwin.clan-cli
-    claude-code.packages.aarch64-darwin.claude-code
+    # claude-code intentionally not installed here: the native installer at
+    # ~/.local/bin/claude shadows it on PATH and self-updates, so the nix copy
+    # was dead weight with a second update path.
   ];
 }
