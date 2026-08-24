@@ -1,4 +1,11 @@
-{ username, ... }:
+{ pkgs, username, ... }:
+let
+  # continuum drives its autosave through a `#(...)` interpolation it PREPENDS
+  # to status-right at plugin load. Our theme sets status-right afterwards
+  # (extraConfig is emitted after run-shell), so the hook must be re-added here
+  # or autosave silently stops.
+  continuumSave = "#(${pkgs.tmuxPlugins.continuum}/share/tmux-plugins/continuum/scripts/continuum_save.sh)";
+in
 {
   home-manager.users.${username}.programs.tmux.extraConfig = ''
     set -g status-position bottom
@@ -9,7 +16,7 @@
     set -g status-left-length 40
     set -g status-right-length 100
     set -g status-left '#[fg=#2e3440,bg=#81a1c1,bold] #S #[fg=#81a1c1,bg=#2e3440]'
-    set -g status-right '#[fg=#3b4252,bg=#2e3440]#[fg=#d8dee9,bg=#3b4252] %H:%M #[fg=#81a1c1,bg=#3b4252]#[fg=#2e3440,bg=#81a1c1,bold] %d-%m-%Y '
+    set -g status-right '${continuumSave}#[fg=#3b4252,bg=#2e3440]#[fg=#d8dee9,bg=#3b4252] %H:%M #[fg=#81a1c1,bg=#3b4252]#[fg=#2e3440,bg=#81a1c1,bold] %d-%m-%Y '
     set -g window-status-current-format '#[fg=#2e3440,bg=#81a1c1]#[fg=#2e3440,bg=#81a1c1,bold] #I #W #[fg=#81a1c1,bg=#2e3440]'
     set -g window-status-format '#[fg=#4c566a,bg=#2e3440] #I #W '
     set -g message-style 'fg=#d8dee9 bg=#3b4252'

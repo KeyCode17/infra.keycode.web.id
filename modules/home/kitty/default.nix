@@ -1,55 +1,66 @@
-{ username, ... }:
+{ lib, username, ... }:
 {
-  home-manager.users.${username}.programs.kitty = {
-    enable = true;
-    settings = {
-      font_family = "CaskaydiaCove Nerd Font";
-      font_size = 14;
+  home-manager.users.${username} = {
+    programs.kitty = {
+      enable = true;
+      settings = {
+        font_family = "CaskaydiaCove Nerd Font";
+        font_size = 14;
 
-      background = "#2e3440";
-      foreground = "#d8dee9";
-      cursor = "#d8dee9";
-      cursor_text_color = "#2e3440";
-      cursor_shape = "block";
-      cursor_blink_interval = "0.5";
-      selection_background = "#434c5e";
-      selection_foreground = "#d8dee9";
+        background = "#2e3440";
+        foreground = "#d8dee9";
+        cursor = "#d8dee9";
+        cursor_text_color = "#2e3440";
+        cursor_shape = "block";
+        cursor_blink_interval = "0.5";
+        selection_background = "#434c5e";
+        selection_foreground = "#d8dee9";
 
-      color0 = "#3b4252";
-      color1 = "#bf616a";
-      color2 = "#5e81ac";
-      color3 = "#ebcb8b";
-      color4 = "#88c0d0";
-      color5 = "#81a1c1";
-      color6 = "#8fbcbb";
-      color7 = "#d8dee9";
-      color8 = "#4c566a";
-      color9 = "#bf616a";
-      color10 = "#5e81ac";
-      color11 = "#ebcb8b";
-      color12 = "#88c0d0";
-      color13 = "#81a1c1";
-      color14 = "#8fbcbb";
-      color15 = "#d8dee9";
+        color0 = "#3b4252";
+        color1 = "#bf616a";
+        color2 = "#5e81ac";
+        color3 = "#ebcb8b";
+        color4 = "#88c0d0";
+        color5 = "#81a1c1";
+        color6 = "#8fbcbb";
+        color7 = "#d8dee9";
+        color8 = "#4c566a";
+        color9 = "#bf616a";
+        color10 = "#5e81ac";
+        color11 = "#ebcb8b";
+        color12 = "#88c0d0";
+        color13 = "#81a1c1";
+        color14 = "#8fbcbb";
+        color15 = "#d8dee9";
 
-      background_opacity = "0.9";
-      background_blur = 50;
-      window_padding_width = 10;
-      confirm_os_window_close = 0;
-      enable_audio_bell = false;
-      shell_integration = "enabled";
+        background_opacity = "0.9";
+        background_blur = 50;
+        window_padding_width = 10;
+        confirm_os_window_close = 0;
+        enable_audio_bell = false;
+        shell_integration = "enabled";
 
-      macos_titlebar_color = "background";
-      macos_option_as_alt = "yes";
-      # titlebar-only (not "yes") hides the macOS title bar but KEEPS the
-      # rounded window corners + shadow, so the window blends with the rounded
-      # sketchybar above and has rounded (not pointy) bottom corners.
-      hide_window_decorations = "titlebar-only";
+        macos_titlebar_color = "background";
+        macos_option_as_alt = "yes";
+        # titlebar-only (not "yes") hides the macOS title bar but KEEPS the
+        # rounded window corners + shadow, so the window blends with the rounded
+        # sketchybar above and has rounded (not pointy) bottom corners.
+        hide_window_decorations = "titlebar-only";
 
-      clipboard_control = "write-clipboard write-primary read-clipboard read-primary";
+        clipboard_control = "write-clipboard write-primary read-clipboard read-primary";
+      };
+      keybindings = {
+        "shift+enter" = "send_text all \\x1b[13;2u";
+      };
     };
-    keybindings = {
-      "shift+enter" = "send_text all \\x1b[13;2u";
-    };
+
+    # kitty drops straight into tmux instead of a bare shell. Falls through
+    # to the normal prompt if tmux-startup fails (e.g. attach refused), so a
+    # broken tmux never leaves us without a usable terminal.
+    programs.zsh.initContent = lib.mkBefore ''
+      if [[ -o interactive && -n "$KITTY_WINDOW_ID" && -z "$TMUX" ]]; then
+        ~/.local/bin/tmux-startup
+      fi
+    '';
   };
 }

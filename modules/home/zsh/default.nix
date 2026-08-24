@@ -42,6 +42,26 @@
         fi
 
         export PATH="$HOME/.cargo/bin:$PATH"
+
+        # Claude Code's github MCP plugin expands GITHUB_PERSONAL_ACCESS_TOKEN
+        # into its Authorization header. Source it from the gh CLI keychain
+        # instead of storing a token on disk. Verified: gh's OAuth token
+        # authenticates against https://api.githubcopilot.com/mcp/.
+        if command -v gh &> /dev/null; then
+          GH_MCP_TOKEN="$(gh auth token 2>/dev/null)"
+          [ -n "$GH_MCP_TOKEN" ] && export GITHUB_PERSONAL_ACCESS_TOKEN="$GH_MCP_TOKEN"
+          unset GH_MCP_TOKEN
+        fi
+
+        # bare `tmux` reattaches the most recently used session instead of
+        # spawning a fresh one; subcommands (ls, kill-server, ...) pass through
+        tmux() {
+          if [[ $# -eq 0 && -z "$TMUX" ]]; then
+            ~/.local/bin/tmux-startup
+          else
+            command tmux "$@"
+          fi
+        }
       '';
     };
 
