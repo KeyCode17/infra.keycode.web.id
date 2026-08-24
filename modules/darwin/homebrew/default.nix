@@ -1,4 +1,9 @@
-{ enableLaravel, lib, ... }:
+{
+  config,
+  enableLaravel,
+  lib,
+  ...
+}:
 {
   homebrew = {
     enable = true;
@@ -6,6 +11,10 @@
       autoUpdate = true;
       cleanup = "zap";
     };
+
+    # Mirror the taps nix-homebrew pins, otherwise `cleanup = "zap"` tries to
+    # untap them every activation and fails on the read-only nix store paths.
+    taps = builtins.attrNames config.nix-homebrew.taps;
 
     brews = lib.optionals enableLaravel [
       "mysql"
@@ -16,12 +25,13 @@
     casks = [
       "helium-browser"
       "firefox"
+      "google-chrome"
       "discord"
       "slack"
-      "figma"
       "pritunl"
       "postman"
       "visual-studio-code"
+      "tailscale-app"
     ];
   };
 }
