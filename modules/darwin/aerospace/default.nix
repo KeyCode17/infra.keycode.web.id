@@ -7,20 +7,59 @@
 }:
 let
   # Caffeine toggle — mirrors Fedora Hyprland `caffeine` (stop/start idle daemon).
-  # Toggles a backgrounded `caffeinate` process; notifies on each switch.
+  # Backgrounds a `caffeinate` process AND flips pmset's disablesleep so the
+  # machine also stays awake with the lid closed; notifies on each switch.
+  #
+  # State of record is pmset's SleepDisabled, NOT the pidfile: a stale pidfile
+  # (crashed caffeinate, reused PID) would otherwise latch the toggle into the
+  # ON branch forever, leaving sleep disabled with no way to clear it.
+  # modules/darwin/sketchybar/default.nix reads the same flag for its icon.
   caffeineToggle = pkgs.writeShellScript "caffeine-toggle" ''
     PIDFILE="/tmp/caffeine-toggle.pid"
-    if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
-      kill "$(cat "$PIDFILE")" 2>/dev/null
-      rm -f "$PIDFILE"
-      /usr/bin/osascript -e 'display notification "Normal idle & display sleep restored" with title "Caffeine OFF"'
+
+    stop_caffeinate() {
+      if [ -f "$PIDFILE" ]; then
+        kill "$(cat "$PIDFILE")" 2>/dev/null
+        rm -f "$PIDFILE"
+      fi
+    }
+
+    if /usr/bin/pmset -g | grep -qE 'SleepDisabled[[:space:]]+1'; then
+      stop_caffeinate
+      /usr/bin/sudo -n /usr/bin/pmset -a disablesleep 0
+      /usr/bin/osascript -e 'display notification "Normal idle & lid sleep restored" with title "Caffeine OFF"'
     else
-      /usr/bin/caffeinate -disu &
+      # drop any leftover process first so a failed pmset cannot leak caffeinates
+      stop_caffeinate
+      # -i prevent idle system sleep, -s prevent sleep on AC. Deliberately no
+      # -d/-u: those assert "display must stay on", and the point of caffeine
+      # here is a machine that keeps working while the screen goes dark.
+      /usr/bin/caffeinate -is &
       echo $! > "$PIDFILE"
-      /usr/bin/osascript -e 'display notification "Idle lock & sleep disabled" with title "☕ Caffeine ON"'
+      if /usr/bin/sudo -n /usr/bin/pmset -a disablesleep 1; then
+        /usr/bin/osascript -e 'display notification "System & lid-close sleep disabled; screen still dims off" with title "☕ Caffeine ON"'
+      else
+        /usr/bin/osascript -e 'display notification "Idle lock disabled, but pmset failed — lid close still sleeps" with title "☕ Caffeine PARTIAL"'
+      fi
     fi
     # Refresh the sketchybar coffee indicator immediately (if bar is running).
     /usr/local/bin/sketchybar --trigger caffeine_change 2>/dev/null || true
+  '';
+
+  # /tmp is not cleared at boot on macOS and disablesleep survives a reboot, so
+  # a machine rebooted while caffeine was ON would come back with sleep disabled
+  # and a stale pidfile. Reset all of it at every boot.
+  #
+  # RunAtLoad also fires when the daemon is (re)loaded by a darwin-rebuild
+  # switch, i.e. while a caffeinate may genuinely be running. Killing it before
+  # dropping the pidfile is what keeps that from orphaning the process: caffeine
+  # simply lands OFF after every switch, which is at least consistent.
+  caffeineBootReset = pkgs.writeShellScript "caffeine-boot-reset" ''
+    if [ -f /tmp/caffeine-toggle.pid ]; then
+      kill "$(cat /tmp/caffeine-toggle.pid)" 2>/dev/null
+      rm -f /tmp/caffeine-toggle.pid
+    fi
+    /usr/bin/pmset -a disablesleep 0
   '';
 
   aerospaceConfig = pkgs.writeText "aerospace.toml" ''
@@ -50,6 +89,9 @@ let
     alt-enter   = 'exec-and-forget open -n $HOME/Applications/Home\ Manager\ Trampolines/kitty.app'
     alt-d       = 'exec-and-forget open -a Raycast'
     alt-b       = 'exec-and-forget open -a Helium'
+    # File manager. Fedora binds this to $mod+E; alt-e is taken by the layout
+    # command here, so it lands on alt-shift-e instead.
+    alt-shift-e = 'exec-and-forget open -a Finder'
 
     # Window focus (vim-style, mirrors $mod + hjkl on workstation)
     alt-h = 'focus left'
@@ -131,6 +173,13 @@ lib.mkIf enableTilingWM {
         }
       )
     ];
+  };
+
+  launchd.daemons.caffeine-boot-reset = {
+    serviceConfig = {
+      ProgramArguments = [ "${caffeineBootReset}" ];
+      RunAtLoad = true;
+    };
   };
 
   launchd.user.agents.borders = {

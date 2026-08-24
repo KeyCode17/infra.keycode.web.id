@@ -50,13 +50,14 @@ let
     sketchybar --set clock_month label="$(date +'%b')"
   '';
 
-  # Caffeine indicator — coffee icon shown only while caffeine mode is ON
-  # (i.e. ~/.local/bin/caffeine-toggle has a live pidfile). Hidden otherwise.
+  # Caffeine indicator — coffee icon shown only while caffeine mode is ON.
+  # Reads pmset's SleepDisabled, the same state of record the toggle in
+  # modules/darwin/aerospace/default.nix writes; a pidfile check would drift
+  # from it whenever caffeinate dies or its PID gets reused.
   # Refreshed instantly by the toggle via `--trigger caffeine_change`.
   caffeineScript = pkgs.writeShellScript "sb-caffeine" ''
     export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
-    PIDFILE="/tmp/caffeine-toggle.pid"
-    if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+    if /usr/bin/pmset -g | grep -qE 'SleepDisabled[[:space:]]+1'; then
       sketchybar --set caffeine drawing=on
     else
       sketchybar --set caffeine drawing=off
