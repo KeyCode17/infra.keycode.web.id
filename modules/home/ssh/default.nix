@@ -42,6 +42,11 @@
           user = "root";
         };
 
+        "dakota" = {
+          hostname = "165.227.83.86";
+          user = "root";
+        };
+
         "strata52.dev" = {
           hostname = "31.97.109.2";
           user = "root";
