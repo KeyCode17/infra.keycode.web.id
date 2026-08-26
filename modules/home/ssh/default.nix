@@ -42,9 +42,12 @@
           user = "root";
         };
 
+        # Hardened by /vps-harden: root SSH disabled, sshd moved off 22,
+        # login restricted to the deployer account (AllowUsers deployer).
         "dakota" = {
           hostname = "165.227.83.86";
-          user = "root";
+          user = "deployer";
+          port = 23614;
         };
 
         "strata52.dev" = {
