@@ -32,6 +32,7 @@
       "postman"
       "visual-studio-code"
       "tailscale-app"
+      "android-studio"
     ];
   };
 }
