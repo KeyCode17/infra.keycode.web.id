@@ -12,6 +12,7 @@
 {
   imports = [
     ./packages/darwin.nix
+    ./packages/reverse-engineering.nix
     ./git
     ./starship
     ./zsh
