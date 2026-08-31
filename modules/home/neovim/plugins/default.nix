@@ -10,5 +10,6 @@
     ./formatting.nix
     ./claudecode.nix
     ./stynx.nix
+    ./grug-far.nix
   ];
 }

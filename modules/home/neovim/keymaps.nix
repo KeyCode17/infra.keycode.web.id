@@ -13,6 +13,37 @@
     { mode = "n"; key = "<leader>s"; action = "<CMD>Telescope find_files<CR>"; options = { desc = "Find files"; }; }
     { mode = "n"; key = "<leader>S"; action = "<CMD>Telescope live_grep<CR>"; options = { desc = "Live grep"; }; }
     { mode = "n"; key = "<leader>b"; action = "<CMD>Telescope buffers<CR>"; options = { desc = "Buffers"; }; }
+    { mode = "n"; key = "<leader>gr"; action = "<CMD>GrugFar<CR>"; options = { desc = "Find and replace (project)"; }; }
+    {
+      mode = "v";
+      key = "<leader>gr";
+      action.__raw = ''
+        function()
+          require("grug-far").with_visual_selection()
+        end
+      '';
+      options = { desc = "Find and replace (selection)"; };
+    }
+    {
+      mode = "n";
+      key = "<leader>gw";
+      action.__raw = ''
+        function()
+          require("grug-far").open({ prefills = { search = vim.fn.expand("<cword>") } })
+        end
+      '';
+      options = { desc = "Find and replace word under cursor"; };
+    }
+    {
+      mode = "n";
+      key = "<leader>gf";
+      action.__raw = ''
+        function()
+          require("grug-far").open({ prefills = { paths = vim.fn.expand("%") } })
+        end
+      '';
+      options = { desc = "Find and replace in current file"; };
+    }
     {
       mode = ["n" "v"];
       key = "<leader>mp";
