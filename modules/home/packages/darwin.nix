@@ -22,6 +22,7 @@
         tree
         lazygit
         lazydocker
+        codex
         bun
         ffmpeg
         cmake
