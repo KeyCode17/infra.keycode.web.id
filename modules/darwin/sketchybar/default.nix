@@ -368,7 +368,18 @@ lib.mkIf enableTilingWM {
 
   launchd.user.agents.sketchybar = {
     serviceConfig = {
-      ProgramArguments = [ "/usr/local/bin/sketchybar" ];
+      # Wait for the /nix APFS volume to mount, then exec the store binary
+      # directly. RunAtLoad can fire before darwin-store mounts /nix, which
+      # penalty-boxes the agent (EX_CONFIG) and KeepAlive never retries -> blank
+      # bar all session. Pointing at /usr/local/bin/sketchybar has its own race:
+      # activate-system rm's and re-cp's that copy on every boot. The /usr/local
+      # copy still exists below for the aerospace trigger and bare `sketchybar`
+      # calls in the config, which run later. (adapted from upstream reboot fix)
+      ProgramArguments = [
+        "/bin/sh"
+        "-c"
+        "/bin/wait4path ${pkgs.sketchybar}/bin/sketchybar && exec ${pkgs.sketchybar}/bin/sketchybar"
+      ];
       EnvironmentVariables = {
         PATH = "/usr/local/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/usr/bin:/bin:/usr/sbin:/sbin";
       };

@@ -66,7 +66,10 @@ let
     # Nord — Aerospace tiling WM
     # Keybinds mirror workstation (Hyprland/SUPER → macOS/cmd)
 
-    start-at-login = true
+    # Startup is owned by the nix-managed launchd agent below (RunAtLoad +
+    # KeepAlive), NOT AeroSpace's own login item, which macOS can silently leave
+    # unapproved across reboots -> no tiling gaps on boot.
+    start-at-login = false
 
     exec-on-workspace-change = [
       '/bin/bash', '-c',
@@ -196,6 +199,24 @@ lib.mkIf enableTilingWM {
       RunAtLoad = true;
       StandardOutPath = "/tmp/borders.out.log";
       StandardErrorPath = "/tmp/borders.err.log";
+    };
+  };
+
+  # Launch AeroSpace from a nix-managed agent instead of its own login item
+  # (macOS can leave that unapproved across reboots -> no tiling gaps). KeepAlive
+  # restarts it if it dies; wait4path guards the /nix mount race the same way the
+  # sketchybar agent does. (adapted from upstream reboot-survival fix)
+  launchd.user.agents.aerospace = {
+    serviceConfig = {
+      ProgramArguments = [
+        "/bin/sh"
+        "-c"
+        "/bin/wait4path ${pkgs.aerospace}/Applications/AeroSpace.app/Contents/MacOS/AeroSpace && exec ${pkgs.aerospace}/Applications/AeroSpace.app/Contents/MacOS/AeroSpace"
+      ];
+      KeepAlive = true;
+      RunAtLoad = true;
+      StandardOutPath = "/tmp/aerospace.out.log";
+      StandardErrorPath = "/tmp/aerospace.err.log";
     };
   };
 }
