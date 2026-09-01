@@ -13,14 +13,14 @@ let
     export PATH="/usr/local/bin:/run/current-system/sw/bin:$PATH"
     WS_NUM="''${NAME#space.}"
     if [ "$AEROSPACE_FOCUSED_WORKSPACE" = "$WS_NUM" ]; then
-      sketchybar --animate overshoot 15 --set "$NAME" \
+      sketchybar --animate sin 18 --set "$NAME" \
         background.color=0xff81a1c1 \
         background.height=12 \
         background.corner_radius=6 \
         icon.padding_left=10 \
         icon.padding_right=10
     else
-      sketchybar --animate overshoot 15 --set "$NAME" \
+      sketchybar --animate sin 18 --set "$NAME" \
         background.color=0x30d8dee9 \
         background.height=8 \
         background.corner_radius=4 \
