@@ -54,6 +54,14 @@
           hostname = "31.97.109.2";
           user = "root";
         };
+
+        "bam-credit-intellegence-platform" = {
+          hostname = "167.172.153.193";
+          user = "deploy";
+          port = 52873;
+          identityFile = "~/.ssh/id_ed25519";
+          identitiesOnly = true;
+        };
       };
     };
 
