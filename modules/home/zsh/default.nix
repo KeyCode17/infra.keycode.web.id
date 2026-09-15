@@ -53,6 +53,15 @@
           unset GH_MCP_TOKEN
         fi
 
+        # Codex CLI reads DEEPSEEK_API_KEY (config.toml env_key) for the
+        # DeepSeek model provider. Source it from the macOS keychain
+        # instead of storing the key on disk.
+        if command -v security &> /dev/null; then
+          DEEPSEEK_KEY="$(security find-generic-password -a "$USER" -s DEEPSEEK_API_KEY -w 2>/dev/null)"
+          [ -n "$DEEPSEEK_KEY" ] && export DEEPSEEK_API_KEY="$DEEPSEEK_KEY"
+          unset DEEPSEEK_KEY
+        fi
+
         # bare `tmux` reattaches the most recently used session instead of
         # spawning a fresh one; subcommands (ls, kill-server, ...) pass through
         tmux() {
