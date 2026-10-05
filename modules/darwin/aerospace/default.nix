@@ -54,7 +54,14 @@ let
   # switch, i.e. while a caffeinate may genuinely be running. Killing it before
   # dropping the pidfile is what keeps that from orphaning the process: caffeine
   # simply lands OFF after every switch, which is at least consistent.
-  caffeineBootReset = pkgs.writeShellScript "caffeine-boot-reset" ''
+  #
+  # Inlined into `/bin/sh -c` instead of a writeShellScript in /nix/store:
+  # /nix is its own APFS volume, mounted after system LaunchDaemons start, so a
+  # RunAtLoad daemon whose program lives there fails to exec at boot with
+  # EX_CONFIG (78) and silently never runs — which left disablesleep latched at
+  # 1 across reboots, the exact state this reset exists to clear. Every other
+  # boot daemon in this config already execs /bin/sh off the root volume.
+  caffeineBootReset = ''
     if [ -f /tmp/caffeine-toggle.pid ]; then
       kill "$(cat /tmp/caffeine-toggle.pid)" 2>/dev/null
       rm -f /tmp/caffeine-toggle.pid
@@ -180,8 +187,14 @@ lib.mkIf enableTilingWM {
 
   launchd.daemons.caffeine-boot-reset = {
     serviceConfig = {
-      ProgramArguments = [ "${caffeineBootReset}" ];
+      ProgramArguments = [
+        "/bin/sh"
+        "-c"
+        caffeineBootReset
+      ];
       RunAtLoad = true;
+      StandardOutPath = "/var/log/caffeine-boot-reset.log";
+      StandardErrorPath = "/var/log/caffeine-boot-reset.log";
     };
   };
 
